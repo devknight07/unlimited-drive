@@ -166,15 +166,16 @@
 
         async function initializeGapiClient() {
             try {
+                // IMPORTANT: We initialize WITHOUT the API Key here to avoid the project mismatch error.
+                // Modern Google API requests can rely solely on the OAuth2 token.
                 await gapi.client.init({
-                    apiKey: API_KEY,
                     discoveryDocs: [DISCOVERY_DOC],
                 });
                 gapiInited = true;
                 maybeEnableButtons();
             } catch (err) {
                 console.error("GAPI Init Error:", err);
-                showError("Failed to initialize Google API client. Please check your API key.");
+                showError("Failed to initialize Google API client.");
             }
         }
 
@@ -190,7 +191,7 @@
                             throw (resp);
                         }
                         accessToken = resp.access_token;
-                        gapi.client.setToken(resp); // Set token for GAPI client
+                        gapi.client.setToken(resp); 
                         authBtnText.innerText = 'Sign Out';
                         loadFiles();
                     },
@@ -247,7 +248,7 @@
                 renderFiles(files);
             } catch (err) {
                 console.error('API Error:', err);
-                const errorMsg = err.result?.error?.message || "Check permissions or folder ID.";
+                const errorMsg = err.result?.error?.message || "Check permissions or project credentials.";
                 showError(`Failed to load files: ${errorMsg}`);
             } finally {
                 showLoading(false);
