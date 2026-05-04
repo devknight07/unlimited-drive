@@ -1,636 +1,616 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0a0a0a">
-<meta name="description" content="Drive Uploader - Upload files to Google Drive">
-<title>Drive Uploader</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg:#0a0a0a; --surface:#111; --surface2:#1a1a1a; --surface3:#222;
-    --border:#2a2a2a; --border2:#333; --text:#e8e8e8; --text2:#888;
-    --text3:#555; --accent:#4ade80; --accent2:#22c55e;
-    --accent-dim:rgba(74,222,128,0.1); --accent-dim2:rgba(74,222,128,0.05);
-    --red:#f87171; --yellow:#fbbf24; --blue:#60a5fa;
-    --mono:'Space Mono',monospace; --sans:'DM Sans',sans-serif;
-    --r:6px; --r2:10px;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
-  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.3;
-    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E")}
-  #app{display:flex;flex-direction:column;min-height:100vh}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="description" content="Drive Uploader - Upload files to Google Drive" />
+  <title>Drive Uploader</title>
 
-  /* Header */
-  header{border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;
-    justify-content:space-between;position:sticky;top:0;background:rgba(10,10,10,.92);
-    backdrop-filter:blur(12px);z-index:100}
-  .logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;
-    font-weight:700;letter-spacing:.08em}
-  .logo-icon{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;
-    align-items:center;justify-content:center}
-  .logo-icon svg{width:16px;height:16px;color:#000}
-  #speed-badge{font-family:var(--mono);font-size:10px;color:var(--text2);background:var(--surface2);
-    border:1px solid var(--border);border-radius:4px;padding:4px 8px;letter-spacing:.05em;display:none}
-  #speed-badge.on{display:block;color:var(--accent);border-color:var(--accent)}
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  /* Init */
-  #init-screen{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-  #init-screen.gone{display:none}
-  .spinner{width:34px;height:34px;border:2.5px solid var(--border);border-top-color:var(--accent);
-    border-radius:50%;animation:spin .7s linear infinite}
-  .init-lbl{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.1em}
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --surface3: #222222;
+      --border: #2a2a2a;
+      --border2: #333333;
+      --text: #e8e8e8;
+      --text2: #888888;
+      --text3: #555555;
+      --accent: #4ade80;
+      --accent2: #22c55e;
+      --accent-dim: rgba(74,222,128,0.1);
+      --accent-dim2: rgba(74,222,128,0.05);
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --blue: #60a5fa;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --radius: 6px;
+      --radius2: 10px;
+    }
+    * { margin:0; padding:0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(180deg, #060606 0%, #0a0a0a 100%);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-  /* Error */
-  #err-screen{flex:1;display:none;align-items:center;justify-content:center;padding:40px 24px}
-  #err-screen.show{display:flex}
-  .err-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);
-    border-radius:var(--r2);padding:36px;text-align:center}
-  .err-card h2{font-size:18px;font-weight:600;margin-bottom:10px;color:var(--red)}
-  .err-card p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:20px}
-  .err-card small{font-family:var(--mono);font-size:11px;color:var(--text3)}
+    /* basic structure */
+    #app { display:flex; flex-direction: column; min-height:100vh; }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display:flex; align-items:center; justify-content:space-between;
+      position: sticky; top:0; background: rgba(10,10,10,0.92); backdrop-filter: blur(12px); z-index:100;
+    }
 
-  /* Main */
-  #main{display:none;flex:1;flex-direction:column}
-  #main.show{display:flex}
+    .logo { display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:13px; font-weight:700; letter-spacing:0.08em; color:var(--text); }
+    .logo-icon { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; }
+    .logo-icon svg { width:16px; height:16px; color:#000; }
 
-  /* Toolbar */
-  .toolbar{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;
-    gap:12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-  .tl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .tr{display:flex;align-items:center;gap:8px}
-  .bc{display:flex;align-items:center;gap:6px;font-size:12px;font-family:var(--mono);
-    color:var(--text2);flex-wrap:wrap}
-  .bc-item{cursor:pointer;color:var(--text2);transition:color .15s}
-  .bc-item:hover{color:var(--accent)}
-  .bc-item.cur{color:var(--text);cursor:default}
-  .bc-sep{color:var(--text3)}
+    .header-right { display:flex; align-items:center; gap:12px; }
+    #speed-badge { font-family:var(--mono); font-size:10px; color:var(--text2); background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:4px 8px; display:none; }
+    #speed-badge.active { display:block; color:var(--accent); border-color:var(--accent); }
 
-  /* Buttons */
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--r);
-    font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:var(--sans)}
-  .btn-p{background:var(--accent);color:#000;justify-content:center;font-weight:600}
-  .btn-p:hover{background:var(--accent2)}
-  .btn-o{background:transparent;color:var(--text);border:1px solid var(--border2)}
-  .btn-o:hover{background:var(--surface3)}
-  .btn-s{padding:6px 14px;font-size:12px}
-  .btn svg{width:14px;height:14px;flex-shrink:0}
+    #user-info { display:none; align-items:center; gap:8px; font-size:13px; color:var(--text2); }
+    #user-info.visible { display:flex; }
+    #user-avatar { width:28px; height:28px; border-radius:50%; border:1.5px solid var(--border2); object-fit:cover; }
+    #user-name { font-size:12px; color:var(--text); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-  /* Drop zone */
-  #dz{margin:20px 24px;border:1.5px dashed var(--border2);border-radius:var(--r2);padding:32px 24px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-    cursor:pointer;transition:all .2s;position:relative;background:var(--accent-dim2);min-height:120px}
-  #dz:hover,#dz.over{border-color:var(--accent);background:var(--accent-dim)}
-  #dz .dz-ico{width:36px;height:36px;color:var(--text3);transition:color .2s}
-  #dz:hover .dz-ico,#dz.over .dz-ico{color:var(--accent)}
-  .dz-t{font-size:14px;font-weight:500;color:var(--text2)}
-  .dz-s{font-size:11px;font-family:var(--mono);color:var(--text3)}
-  #fi{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-  #fdi{display:none}
+    /* auth screen */
+    #auth-screen { flex:1; display:flex; align-items:center; justify-content:center; padding:40px 24px; }
+    .auth-card { width:100%; max-width:420px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius2); padding:36px; text-align:center; }
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:var(--radius); font-size:13px; font-weight:500; cursor:pointer; border:none; transition:all 0.15s; font-family:var(--sans); text-decoration:none; }
+    .btn-primary { background:var(--accent); color:#000; width:100%; justify-content:center; font-weight:600; }
+    .btn-primary:disabled { opacity: 0.5; cursor:not-allowed; }
+    .btn-outline { background:transparent; color:var(--text); border:1px solid var(--border2); }
+    .btn-sm { padding:6px 12px; font-size:12px; }
 
-  /* Queue */
-  #queue{margin:0 24px 12px;display:flex;flex-direction:column;gap:8px}
-  .qi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;
-    display:flex;align-items:center;gap:12px;animation:slideIn .2s ease}
-  @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-  .qi-ico svg{width:20px;height:20px;color:var(--text3)}
-  .qi-info{flex:1;min-width:0}
-  .qi-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:5px}
-  .qi-meta{font-size:10px;font-family:var(--mono);color:var(--text2);display:flex;align-items:center;gap:8px}
-  .pb{width:100%;height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
-  .pf{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;width:0%}
-  .qs{font-size:10px;font-family:var(--mono);font-weight:700;letter-spacing:.06em;flex-shrink:0}
-  .qs.p{color:var(--text3)} .qs.u{color:var(--yellow)} .qs.d{color:var(--accent)} .qs.e{color:var(--red)}
+    /* dropzone & queue */
+    #drop-zone {
+      margin:20px 24px; border:1.5px dashed var(--border2); border-radius:var(--radius2);
+      padding:28px 24px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+      cursor:pointer; transition: all 0.18s; position:relative; background:var(--accent-dim2); min-height:120px;
+    }
+    #drop-zone.dragging { border-color:var(--accent); background:var(--accent-dim); }
+    #drop-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+    .dz-title { font-size:14px; font-weight:500; color:var(--text2); }
+    .dz-sub { font-size:11px; font-family:var(--mono); color:var(--text3); }
 
-  /* Files grid */
-  #fc{flex:1;padding:0 24px 24px}
-  .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-top:4px}
-  .st{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
-  #fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-  .fc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;
-    cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:10px;
-    position:relative;animation:fadeIn .25s ease}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  .fc:hover{border-color:var(--border2);background:var(--surface2);transform:translateY(-1px)}
-  .fc-ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center}
-  .fc-ico svg{width:20px;height:20px}
-  .if{background:rgba(251,191,36,.12)} .if svg{color:var(--yellow)}
-  .ii{background:rgba(96,165,250,.12)}  .ii svg{color:var(--blue)}
-  .id{background:rgba(74,222,128,.12)}  .id svg{color:var(--accent)}
-  .ig{background:var(--surface3)}       .ig svg{color:var(--text3)}
-  .fc-name{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4}
-  .fc-meta{font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:auto}
-  .fc-acts{position:absolute;top:10px;right:10px;display:none;gap:4px}
-  .fc:hover .fc-acts{display:flex}
-  .ib{width:26px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center;
-    border:none;cursor:pointer;transition:all .15s;background:var(--surface3)}
-  .ib:hover{background:var(--border2)}
-  .ib svg{width:13px;height:13px;color:var(--text2)}
-  .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:60px 20px;gap:12px;color:var(--text3);grid-column:1/-1}
-  .empty svg{width:40px;height:40px}
-  .empty p{font-size:13px}
-  .loader{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);
-    border-radius:50%;animation:spin .7s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
+    #upload-queue { margin:0 24px 12px; display:flex; flex-direction:column; gap:8px; }
 
-  /* Modal */
-  .mo{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:500;
-    display:flex;align-items:center;justify-content:center;padding:24px;
-    opacity:0;pointer-events:none;transition:opacity .2s}
-  .mo.open{opacity:1;pointer-events:all}
-  .md{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r2);
-    width:100%;max-width:380px;padding:28px;transform:translateY(12px);transition:transform .2s}
-  .mo.open .md{transform:translateY(0)}
-  .md h3{font-size:16px;font-weight:600;margin-bottom:20px}
-  .md label{display:block;font-size:11px;font-family:var(--mono);color:var(--text2);
-    letter-spacing:.08em;margin-bottom:6px}
-  .md input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
-    padding:10px 12px;font-size:13px;color:var(--text);outline:none;margin-bottom:20px;
-    font-family:var(--sans);transition:border-color .2s}
-  .md input:focus{border-color:var(--accent)}
-  .ma{display:flex;gap:8px;justify-content:flex-end}
+    .upload-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px; display:flex; align-items:center; gap:12px; }
+    .upload-item-info { flex:1; min-width:0; }
+    .upload-item-name { font-size:13px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:6px; }
+    .progress-bar { width:100%; height:4px; background:var(--border); border-radius:3px; overflow:hidden; margin-top:6px; }
+    .progress-fill { height:100%; background:var(--accent); width:0%; transition:width 0.25s ease; }
 
-  /* Toast */
-  #toasts{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:1000}
-  .toast{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);
-    padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;
-    animation:tIn .25s ease;min-width:240px;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-  @keyframes tIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-  .toast.ok{border-left:3px solid var(--accent)} .toast.er{border-left:3px solid var(--red)}
-  .toast.inf{border-left:3px solid var(--blue)}
-  .td{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-  .toast.ok .td{background:var(--accent)} .toast.er .td{background:var(--red)}
-  .toast.inf .td{background:var(--blue)}
+    /* files */
+    #files-container { flex:1; padding:0 24px 24px; }
+    #files-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-top:8px; }
+    .file-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .file-card-name { font-size:12px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-  @media(max-width:600px){
-    header,.toolbar{padding-left:16px;padding-right:16px}
-    #dz{margin:16px;padding:24px 16px}
-    #queue{margin:0 16px 12px}
-    #fc{padding:0 16px 16px}
-    #fg{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
-  }
-</style>
+    /* modal & toast basics (kept minimal for brevity) */
+    .modal-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:500; }
+    .modal-overlay.open { display:flex; background: rgba(0,0,0,0.6); }
+    .modal { background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius2); padding:20px; width:100%; max-width:380px; }
+
+    #toast-container { position:fixed; right:24px; bottom:24px; display:flex; flex-direction:column; gap:8px; z-index:1000; }
+    .toast { background:var(--surface); border:1px solid var(--border2); border-radius:8px; padding:10px 12px; color:var(--text); }
+    .toast.success { border-left:3px solid var(--accent); }
+    .toast.error { border-left:3px solid var(--red); }
+
+    @media (max-width:600px) {
+      header { padding:0 16px; }
+      .app-toolbar { padding:12px 16px; }
+      #drop-zone { margin:16px; padding:24px 16px; }
+      #upload-queue { margin:0 16px 12px; }
+      #files-container { padding:0 16px 16px; }
+      #files-grid { grid-template-columns: repeat(auto-fill,minmax(150px,1fr)); }
+    }
+  </style>
 </head>
 <body>
-<div id="app">
-  <header>
-    <div class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+  <div id="app">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        DRIVE·UP
+      </div>
+
+      <div class="header-right">
+        <div id="speed-badge">▲ --</div>
+        <div id="user-info">
+          <img id="user-avatar" alt="avatar" />
+          <span id="user-name"></span>
+        </div>
+        <button class="btn btn-outline btn-sm" id="signout-btn" style="display:none">Sign out</button>
+      </div>
+    </header>
+
+    <div id="auth-screen">
+      <div class="auth-card">
+        <h1>Drive Uploader</h1>
+        <p style="color:var(--text2); margin-bottom:18px;">A lightweight interface to upload files to a Google Drive folder.</p>
+        <button class="btn btn-primary" id="signin-btn">Connect with Google</button>
+      </div>
+    </div>
+
+    <div id="main-app" style="display:none;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--border);">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div id="breadcrumb"><span style="font-family:var(--mono); color:var(--text2); font-size:12px;">Root</span></div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="btn btn-outline btn-sm" id="new-folder-btn">New Folder</button>
+          <button class="btn btn-primary btn-sm" id="upload-btn">Upload Files</button>
+        </div>
+      </div>
+
+      <div id="drop-zone">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="8 11 12 7 16 11"/>
+          <line x1="12" y1="7" x2="12" y2="21"/>
         </svg>
+        <div class="dz-title">Drop files here to upload</div>
+        <div class="dz-sub">or click to browse · any file type</div>
+        <input id="file-input" type="file" multiple />
       </div>
-      DRIVE·UP
-    </div>
-    <div id="speed-badge">▲ --</div>
-  </header>
 
-  <!-- Loading -->
-  <div id="init-screen">
-    <div class="spinner"></div>
-    <div class="init-lbl">CONNECTING…</div>
-  </div>
+      <div id="upload-queue"></div>
 
-  <!-- Error -->
-  <div id="err-screen">
-    <div class="err-card">
-      <h2>Connection Failed</h2>
-      <p id="err-msg">Could not connect to Google Drive.</p>
-      <small id="err-detail"></small>
+      <div id="files-container">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:8px;">
+          <span style="font-family:var(--mono); color:var(--text3); font-size:11px; letter-spacing:0.1em;">Files & Folders</span>
+          <div id="files-loader" style="display:none; width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%;"></div>
+        </div>
+        <div id="files-grid"></div>
+      </div>
     </div>
   </div>
 
-  <!-- App -->
-  <div id="main">
-    <div class="toolbar">
-      <div class="tl">
-        <div class="bc" id="bc"><span class="bc-item cur">Root</span></div>
+  <div id="folder-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <h3>Create New Folder</h3>
+      <label style="font-family:var(--mono); color:var(--text2); font-size:11px;">FOLDER NAME</label>
+      <input id="folder-name-input" type="text" placeholder="My Folder" style="width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border); background:var(--surface2); color:var(--text)" />
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+        <button class="btn btn-outline" id="folder-cancel">Cancel</button>
+        <button class="btn btn-primary" id="folder-create">Create</button>
       </div>
-      <div class="tr">
-        <button class="btn btn-o btn-s" onclick="openFM()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-            <line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
-          </svg>New Folder
-        </button>
-        <button class="btn btn-o btn-s" onclick="document.getElementById('fdi').click()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-            <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>Upload Folder
-        </button>
-        <button class="btn btn-p btn-s" onclick="document.getElementById('fi').click()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>Upload Files
-        </button>
-      </div>
-    </div>
-
-    <div id="dz" ondragover="dzOver(event)" ondragleave="dzLeave()" ondrop="dzDrop(event)">
-      <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-        <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-      </svg>
-      <div class="dz-t">Drop files or folders here</div>
-      <div class="dz-s">or use the buttons above · any file type</div>
-      <input type="file" id="fi" multiple onchange="filePick(event)">
-      <input type="file" id="fdi" webkitdirectory multiple onchange="folderPick(event)">
-    </div>
-
-    <div id="queue"></div>
-
-    <div id="fc">
-      <div class="sh">
-        <span class="st" id="fl-lbl">Files &amp; Folders</span>
-        <div class="loader" id="fl-spin" style="display:none"></div>
-      </div>
-      <div id="fg"></div>
     </div>
   </div>
-</div>
 
-<!-- New Folder Modal -->
-<div class="mo" id="fm">
-  <div class="md">
-    <h3>Create New Folder</h3>
-    <label>FOLDER NAME</label>
-    <input type="text" id="fn-inp" placeholder="My Folder"
-           onkeydown="if(event.key==='Enter')mkFolder()">
-    <div class="ma">
-      <button class="btn btn-o" onclick="closeFM()">Cancel</button>
-      <button class="btn btn-p" onclick="mkFolder()">Create</button>
-    </div>
-  </div>
-</div>
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-<div id="toasts"></div>
+  <script>
+    /*
+      IMPORTANT: Replace placeholders below with your own values at deploy time.
+      Do NOT commit real secrets to the public repository. Use environment/build-time injection.
+    */
+    const CLIENT_ID = '155197234126-k0por50dvrg1k2p5b3r6722jdhpst06e.apps.googleusercontent.com';
+    const API_KEY = 'AIzaSyB51qBN36v8ffCaXHXOW1VI4Kd1UlfjZJQ';
+    const ROOT_FOLDER = '1MJ7_PugrHBD3Ej3qug1R6cpQXIIGtd1X'; // e.g. 'root' or a folder id
+    const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 
-<script>
-/* ── CONFIG ─────────────────────────────────────────────────────────────── */
-const CLIENT_ID   = '155197234126-k0por50dvrg1k2p5b3r6722jdhpst06e.apps.googleusercontent.com';
-const ROOT_FOLDER = '1MJ7_PugrHBD3Ej3qug1R6cpQXIIGtd1X';
-const SCOPE       = 'https://www.googleapis.com/auth/drive';
-
-/* ── STATE ──────────────────────────────────────────────────────────────── */
-let token = null, tokenExp = 0;
-let folderId = ROOT_FOLDER, stack = [];
-let qItems = [], active = 0;
-let tokenClient = null;
-let _uidN = 0;
-
-/* ── BOOT ───────────────────────────────────────────────────────────────── */
-(function boot() {
-  const s = document.createElement('script');
-  s.src = 'https://accounts.google.com/gsi/client';
-  s.onload  = initGIS;
-  s.onerror = () => fatal('Could not load Google Identity Services.', 'Check your internet connection.');
-  document.head.appendChild(s);
-})();
-
-function initGIS() {
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPE,
-    callback: '' // set per-call
-  });
-  autoAuth();
-}
-
-/* ── AUTH ───────────────────────────────────────────────────────────────── */
-function autoAuth() {
-  // Check localStorage for a still-valid token
-  try {
-    const s = JSON.parse(localStorage.getItem('du2'));
-    if (s && s.t && s.e > Date.now() + 30000) {
-      token = s.t; tokenExp = s.e;
-      showApp(); return;
-    }
-  } catch {}
-
-  // Try silent (no prompt) — works if user already consented on this device
-  getToken({ prompt: 'none' })
-    .then(showApp)
-    .catch(() =>
-      // Silent failed; try without prompt restriction (may show a brief popup once)
-      getToken({ prompt: '' })
-        .then(showApp)
-        .catch(err => fatal('Authentication failed.', String(err)))
-    );
-}
-
-function getToken(opts) {
-  return new Promise((resolve, reject) => {
-    tokenClient.callback = resp => {
-      if (resp.error) { reject(resp.error); return; }
-      token    = resp.access_token;
-      tokenExp = Date.now() + (resp.expires_in - 60) * 1000;
-      try { localStorage.setItem('du2', JSON.stringify({ t: token, e: tokenExp })); } catch {}
-      resolve();
+    let state = {
+      currentFolderId: ROOT_FOLDER,
+      folderStack: [],
+      uploadQueue: [],
+      isSignedIn: false,
+      tokenClient: null
     };
-    tokenClient.requestAccessToken(opts);
-  });
-}
 
-async function freshToken() {
-  if (token && Date.now() < tokenExp) return token;
-  await getToken({ prompt: '' });
-  return token;
-}
+    // Promises to know when libs finished loading
+    let gapiLoaded = false;
+    let gisLoaded = false;
 
-/* ── UI ─────────────────────────────────────────────────────────────────── */
-function showApp() {
-  document.getElementById('init-screen').classList.add('gone');
-  document.getElementById('main').classList.add('show');
-  renderBC(); loadFiles();
-}
+    // UI refs
+    const signinBtn = document.getElementById('signin-btn');
+    const signoutBtn = document.getElementById('signout-btn');
+    const userInfo = document.getElementById('user-info');
+    const userNameEl = document.getElementById('user-name');
+    const userAvatar = document.getElementById('user-avatar');
+    const mainApp = document.getElementById('main-app');
+    const authScreen = document.getElementById('auth-screen');
+    const fileInput = document.getElementById('file-input');
+    const dropZone = document.getElementById('drop-zone');
+    const filesGrid = document.getElementById('files-grid');
+    const uploadQueueEl = document.getElementById('upload-queue');
+    const folderModal = document.getElementById('folder-modal');
+    const folderCreate = document.getElementById('folder-create');
+    const folderCancel = document.getElementById('folder-cancel');
 
-function fatal(msg, detail) {
-  document.getElementById('init-screen').classList.add('gone');
-  document.getElementById('err-msg').textContent    = msg;
-  document.getElementById('err-detail').textContent = detail || '';
-  document.getElementById('err-screen').classList.add('show');
-}
-
-/* ── DRIVE HELPERS ──────────────────────────────────────────────────────── */
-async function api(method, path, body, params) {
-  const tok = await freshToken();
-  const url = new URL('https://www.googleapis.com/drive/v3/' + path);
-  if (params) Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
-  const opts = { method, headers: { Authorization: 'Bearer ' + tok } };
-  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
-  const r = await fetch(url, opts);
-  if (!r.ok) { const t = await r.text(); throw new Error(r.status + ' ' + t.slice(0,120)); }
-  return r.json();
-}
-
-/* ── FILES ──────────────────────────────────────────────────────────────── */
-async function loadFiles() {
-  const grid = document.getElementById('fg'), spin = document.getElementById('fl-spin');
-  spin.style.display = 'block'; grid.innerHTML = '';
-  try {
-    const d = await api('GET','files',null,{
-      q:`'${folderId}' in parents and trashed=false`,
-      fields:'files(id,name,mimeType,size,modifiedTime)',
-      orderBy:'folder,name', pageSize:'200'
-    });
-    const files = d.files || [];
-    spin.style.display = 'none';
-    document.getElementById('fl-lbl').textContent =
-      files.length + ' item' + (files.length !== 1 ? 's' : '');
-    if (!files.length) {
-      grid.innerHTML = `<div class="empty">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-        </svg><p>This folder is empty</p></div>`;
-      return;
-    }
-    files.forEach(f => grid.appendChild(makeCard(f)));
-  } catch(e) {
-    spin.style.display = 'none';
-    toast('Error loading files: ' + e.message, 'er');
-  }
-}
-
-function makeCard(f) {
-  const isDir = f.mimeType === 'application/vnd.google-apps.folder';
-  const ic = getIcon(f.mimeType), sz = f.size ? fmt(+f.size) : '—';
-  const dt = f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString() : '';
-  const el = document.createElement('div');
-  el.className = 'fc';
-  el.innerHTML = `
-    <div class="fc-ico ${ic.c}">${ic.s}</div>
-    <div class="fc-name" title="${x(f.name)}">${x(f.name)}</div>
-    <div class="fc-meta">${sz} · ${dt}</div>
-    <div class="fc-acts">
-      ${!isDir ? `<button class="ib" title="Download"
-          onclick="event.stopPropagation();dlFile('${f.id}','${x(f.name)}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg></button>` : ''}
-    </div>`;
-  if (isDir) el.addEventListener('click', () => enter(f.id, f.name));
-  return el;
-}
-
-function getIcon(m) {
-  const F=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-    stroke-linecap="round" stroke-linejoin="round">
-    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>`;
-  const I=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-    stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2"/>
-    <circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
-  const D=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-    stroke-linecap="round" stroke-linejoin="round">
-    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/></svg>`;
-  const G=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-    stroke-linecap="round" stroke-linejoin="round">
-    <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/>
-    <polyline points="13 2 13 9 20 9"/></svg>`;
-  if (m==='application/vnd.google-apps.folder') return {c:'fc-ico if',s:F};
-  if (m.startsWith('image/'))                   return {c:'fc-ico ii',s:I};
-  if (m.includes('document')||m.includes('text')||m.includes('pdf')) return {c:'fc-ico id',s:D};
-  return {c:'fc-ico ig',s:G};
-}
-
-async function dlFile(id, name) {
-  try {
-    const tok = await freshToken();
-    const r = await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`,
-      { headers: { Authorization:'Bearer '+tok } });
-    if (!r.ok) throw new Error('HTTP '+r.status);
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(await r.blob());
-    a.download = name; a.click();
-  } catch(e) { toast('Download failed: '+e.message,'er'); }
-}
-
-/* ── NAV ────────────────────────────────────────────────────────────────── */
-function renderBC() {
-  let h = `<span class="bc-item" onclick="goRoot()">Root</span>`;
-  stack.forEach((f,i) => {
-    h += `<span class="bc-sep">/</span>`;
-    if (i < stack.length-1)
-      h += `<span class="bc-item" onclick="goIdx(${i})">${x(f.name)}</span>`;
-    else
-      h += `<span class="bc-item cur">${x(f.name)}</span>`;
-  });
-  document.getElementById('bc').innerHTML = h;
-}
-function goRoot() { folderId=ROOT_FOLDER; stack=[]; renderBC(); loadFiles(); }
-function goIdx(i) { stack=stack.slice(0,i+1); folderId=stack[i].id; renderBC(); loadFiles(); }
-function enter(id,name) { stack.push({id,name}); folderId=id; renderBC(); loadFiles(); }
-
-/* ── FOLDER MODAL ───────────────────────────────────────────────────────── */
-function openFM()  { document.getElementById('fn-inp').value=''; document.getElementById('fm').classList.add('open'); setTimeout(()=>document.getElementById('fn-inp').focus(),180); }
-function closeFM() { document.getElementById('fm').classList.remove('open'); }
-
-async function mkFolder() {
-  const name = document.getElementById('fn-inp').value.trim();
-  if (!name) return; closeFM();
-  try {
-    await api('POST','files',{name,mimeType:'application/vnd.google-apps.folder',parents:[folderId]});
-    toast(`Folder "${name}" created`,'ok'); loadFiles();
-  } catch(e) { toast('Failed: '+e.message,'er'); }
-}
-
-/* ── DRAG & DROP ────────────────────────────────────────────────────────── */
-function dzOver(e) { e.preventDefault(); document.getElementById('dz').classList.add('over'); }
-function dzLeave()  { document.getElementById('dz').classList.remove('over'); }
-
-async function dzDrop(e) {
-  e.preventDefault(); document.getElementById('dz').classList.remove('over');
-  const items = [...(e.dataTransfer.items||[])];
-  if (!items.length) return;
-  const entries = items.map(i=>i.webkitGetAsEntry?.()).filter(Boolean);
-  if (entries.length) {
-    for (const en of entries) await processEntry(en, folderId);
-    loadFiles();
-  } else {
-    enqueue([...e.dataTransfer.files], folderId);
-  }
-}
-
-async function processEntry(en, pid) {
-  if (en.isFile) {
-    const f = await new Promise((res,rej)=>en.file(res,rej));
-    enqueue([f], pid);
-  } else if (en.isDirectory) {
-    let nid;
-    try {
-      const r = await api('POST','files',{name:en.name,mimeType:'application/vnd.google-apps.folder',parents:[pid]});
-      nid = r.id;
-    } catch(e) { toast('Could not create folder: '+e.message,'er'); return; }
-    const kids = await readAll(en.createReader());
-    for (const k of kids) await processEntry(k, nid);
-  }
-}
-
-function readAll(reader) {
-  return new Promise((res,rej) => {
-    const all=[];
-    (function go(){ reader.readEntries(es=>{ if(!es.length){res(all);return;} all.push(...es); go(); },rej); })();
-  });
-}
-
-/* ── PICK HANDLERS ──────────────────────────────────────────────────────── */
-function filePick(e) { enqueue([...e.target.files], folderId); e.target.value=''; }
-
-async function folderPick(e) {
-  const files = [...e.target.files]; e.target.value='';
-  if (!files.length) return;
-  const cache = { '': folderId };
-  files.sort((a,b)=>(a.webkitRelativePath||a.name).split('/').length - (b.webkitRelativePath||b.name).split('/').length);
-  for (const f of files) {
-    const rel = f.webkitRelativePath || f.name, parts = rel.split('/');
-    for (let i=1; i<parts.length-1; i++) {
-      const key=parts.slice(0,i+1).join('/'), pk=parts.slice(0,i).join('/');
-      if (!cache[key]) {
+    // Load handlers for libraries (these script tags are included below the file)
+    function gapiLoadedHandler() {
+      gapiLoaded = true;
+      gapi.load('client', async () => {
         try {
-          const r = await api('POST','files',{name:parts[i],mimeType:'application/vnd.google-apps.folder',parents:[cache[pk]||folderId]});
-          cache[key]=r.id;
-        } catch(e) { toast('Folder error: '+e.message,'er'); }
+          await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+        } catch (err) {
+          console.error('gapi.client.init failed', err);
+        }
+      });
+    }
+
+    function gisLoadedHandler() {
+      // Initialize token client
+      state.tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: handleTokenResponse
+      });
+      gisLoaded = true;
+    }
+
+    // Attach main event listeners
+    signinBtn.addEventListener('click', async () => {
+      signinBtn.disabled = true;
+      signinBtn.textContent = 'Connecting…';
+      try {
+        if (!gisLoaded) throw new Error('GSI library not loaded');
+        // Request an access token. If user hasn't consented before, a prompt appears.
+        state.tokenClient.requestAccessToken({ prompt: 'consent' });
+      } catch (err) {
+        console.error(err);
+        showToast('Sign-in failed: ' + (err.message || err), 'error');
+        signinBtn.disabled = false;
+        signinBtn.textContent = 'Connect with Google';
+      }
+    });
+
+    signoutBtn.addEventListener('click', signOut);
+
+    fileInput.addEventListener('change', (e) => {
+      queueFiles(Array.from(e.target.files));
+      fileInput.value = '';
+    });
+
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragging'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragging'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault(); dropZone.classList.remove('dragging');
+      queueFiles(Array.from(e.dataTransfer.files || []));
+    });
+
+    document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
+    document.getElementById('new-folder-btn').addEventListener('click', () => openFolderModal());
+
+    folderCancel.addEventListener('click', closeFolderModal);
+    folderCreate.addEventListener('click', createFolder);
+
+    // Token response callback
+    async function handleTokenResponse(resp) {
+      if (!resp || resp.error) {
+        showToast('Auth failed: ' + (resp && resp.error), 'error');
+        signinBtn.disabled = false;
+        signinBtn.textContent = 'Connect with Google';
+        return;
+      }
+
+      // Set token for gapi.client use
+      const token = resp.access_token;
+      if (!token) {
+        showToast('No access token received', 'error');
+        return;
+      }
+      gapi.client.setToken({ access_token: token });
+
+      // Save minimal session to local storage for quick restore (no refresh_token here)
+      localStorage.setItem('driveup_session', JSON.stringify({ access_token: token, created: Date.now() }));
+
+      // fetch basic profile via Drive about.get
+      try {
+        const res = await gapi.client.drive.about.get({ fields: 'user' });
+        const u = res.result.user || {};
+        state.isSignedIn = true;
+        userNameEl.textContent = u.displayName || 'Me';
+        userAvatar.src = (u.photoLink || '');
+        userInfo.classList.add('visible');
+        signoutBtn.style.display = 'inline-flex';
+        authScreen.style.display = 'none';
+        mainApp.style.display = 'block';
+        loadFiles();
+        showToast('Signed in', 'success');
+      } catch (err) {
+        console.error('about.get error', err);
+        showToast('Failed to load user info', 'error');
+      } finally {
+        signinBtn.disabled = false;
+        signinBtn.textContent = 'Connect with Google';
       }
     }
-    const pk=parts.slice(0,parts.length-1).join('/');
-    enqueue([f], cache[pk]||folderId);
-  }
-}
 
-/* ── UPLOAD QUEUE ───────────────────────────────────────────────────────── */
-function enqueue(files, pid) {
-  files.forEach(f => {
-    const item = { file:f, uid:++_uidN, status:'p', pid };
-    qItems.push(item); renderQI(item);
-  });
-  pump();
-}
+    // Sign out logic
+    function signOut() {
+      try {
+        const token = gapi.client.getToken && gapi.client.getToken().access_token;
+        if (token) {
+          // Revoke token with GSI revoke endpoint
+          google.accounts.oauth2.revoke(token);
+        }
+      } catch (e) { /* ignore */ }
 
-function renderQI(item) {
-  const ic = getIcon(item.file.type||'');
-  const d  = document.createElement('div');
-  d.className='qi'; d.id='qi-'+item.uid;
-  d.innerHTML=`
-    <div class="qi-ico">${ic.s}</div>
-    <div class="qi-info">
-      <div class="qi-name">${x(item.file.name)}</div>
-      <div class="qi-meta"><span>${fmt(item.file.size)}</span><span id="qp-${item.uid}"></span></div>
-      <div class="pb"><div class="pf" id="qb-${item.uid}"></div></div>
-    </div>
-    <div class="qs p" id="qs-${item.uid}">PENDING</div>`;
-  document.getElementById('queue').prepend(d);
-}
+      localStorage.removeItem('driveup_session');
+      state.isSignedIn = false;
+      userInfo.classList.remove('visible');
+      signoutBtn.style.display = 'none';
+      authScreen.style.display = 'block';
+      mainApp.style.display = 'none';
+      showToast('Signed out', 'info');
+    }
 
-function pump() {
-  qItems.filter(i=>i.status==='p').forEach(item => {
-    if (active>=3) return;
-    active++; item.status='u';
-    upload(item).finally(()=>{ active--; pump(); });
-  });
-}
+    // Check for saved token when page loads and try restore
+    async function tryAutoRestore() {
+      try {
+        const s = JSON.parse(localStorage.getItem('driveup_session') || 'null');
+        if (s && s.access_token) {
+          // Set token and try to use it
+          gapi.client.setToken({ access_token: s.access_token });
+          // Check token validity by requesting drive about
+          const res = await gapi.client.drive.about.get({ fields: 'user' });
+          const u = res.result.user || {};
+          state.isSignedIn = true;
+          userNameEl.textContent = u.displayName || 'Me';
+          userAvatar.src = (u.photoLink || '');
+          userInfo.classList.add('visible');
+          signoutBtn.style.display = 'inline-flex';
+          authScreen.style.display = 'none';
+          mainApp.style.display = 'block';
+          loadFiles();
+        }
+      } catch (err) {
+        // Token invalid or expired; clear it
+        localStorage.removeItem('driveup_session');
+      }
+    }
 
-async function upload(item) {
-  const st=$('qs-'+item.uid), bar=$('qb-'+item.uid), pct=$('qp-'+item.uid);
-  if (st) { st.className='qs u'; st.textContent='UPLOADING'; }
-  try {
-    const tok  = await freshToken();
-    const meta = { name:item.file.name, parents:[item.pid] };
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(meta)],{type:'application/json'}));
-    form.append('file', item.file);
-    const t0 = Date.now();
-    await new Promise((res,rej) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST','https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
-      xhr.setRequestHeader('Authorization','Bearer '+tok);
-      xhr.upload.onprogress = ev => {
-        const p = Math.round(ev.loaded/ev.total*100);
-        if (bar) bar.style.width=p+'%';
-        if (pct) pct.textContent=p+'%';
-        const sec=(Date.now()-t0)/1000;
-        if (sec>0) { const b=$('speed-badge'); b.textContent='▲ '+fmt(ev.loaded/sec)+'/s'; b.classList.add('on'); }
-      };
-      xhr.onload  = ()=>xhr.status<300?res():rej(new Error('HTTP '+xhr.status+' '+xhr.responseText.slice(0,80)));
-      xhr.onerror = ()=>rej(new Error('Network error'));
-      xhr.send(form);
-    });
-    if (st){ st.className='qs d'; st.textContent='DONE'; }
-    $('speed-badge').classList.remove('on');
-    loadFiles();
-    setTimeout(()=>$('qi-'+item.uid)?.remove(), 2500);
-  } catch(e) {
-    if (st){ st.className='qs e'; st.textContent='ERROR'; }
-    toast('Upload failed: '+e.message,'er');
-  }
-}
+    // Files: list files in currentFolderId
+    async function loadFiles() {
+      filesGrid.innerHTML = '';
+      document.getElementById('files-loader').style.display = 'inline-block';
+      try {
+        // Use gapi client (requires gapi.client.setToken(...) done during sign-in)
+        const q = `'${state.currentFolderId}' in parents and trashed = false`;
+        const res = await gapi.client.drive.files.list({
+          q,
+          pageSize: 200,
+          fields: 'files(id,name,mimeType,size,modifiedTime,thumbnailLink)'
+        });
+        const files = (res.result && res.result.files) || [];
+        if (!files.length) {
+          filesGrid.innerHTML = `<div style="color:var(--text3); padding:36px; text-align:center;">No files found</div>`;
+          return;
+        }
+        files.forEach(f => {
+          const card = document.createElement('div');
+          card.className = 'file-card';
+          const name = document.createElement('div');
+          name.className = 'file-card-name';
+          name.textContent = f.name;
+          card.appendChild(name);
+          const meta = document.createElement('div');
+          meta.style.fontFamily = 'var(--mono)';
+          meta.style.fontSize = '11px';
+          meta.style.color = 'var(--text3)';
+          meta.textContent = `${f.mimeType} ${f.size ? '• ' + formatSize(+f.size) : ''}`;
+          card.appendChild(meta);
+          if (f.mimeType === 'application/vnd.google-apps.folder') {
+            card.addEventListener('click', () => {
+              state.folderStack.push({ id: state.currentFolderId, name: f.name });
+              state.currentFolderId = f.id;
+              loadFiles();
+            });
+          } else {
+            const actions = document.createElement('div');
+            actions.style.marginTop = '8px';
+            const dl = document.createElement('button');
+            dl.className = 'btn btn-outline btn-sm';
+            dl.textContent = 'Download';
+            dl.addEventListener('click', (ev) => { ev.stopPropagation(); downloadFile(f.id, f.name); });
+            actions.appendChild(dl);
+            card.appendChild(actions);
+          }
+          filesGrid.appendChild(card);
+        });
+      } catch (err) {
+        console.error('loadFiles error', err);
+        showToast('Failed to load files', 'error');
+      } finally {
+        document.getElementById('files-loader').style.display = 'none';
+      }
+    }
 
-/* ── UTILS ──────────────────────────────────────────────────────────────── */
-function $(id){ return document.getElementById(id); }
-function fmt(b){ if(!b)return'0 B'; const u=['B','KB','MB','GB'],i=Math.floor(Math.log(b)/Math.log(1024)); return(b/Math.pow(1024,i)).toFixed(1)+' '+u[i]; }
-function x(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function toast(msg,type='inf'){
-  const c=$('toasts'), t=document.createElement('div');
-  t.className='toast '+type;
-  t.innerHTML=`<div class="td"></div><span>${x(msg)}</span>`;
-  c.appendChild(t); setTimeout(()=>t.remove(),4500);
-}
-</script>
+    // Download file using the Drive REST endpoint (requires access token)
+    async function downloadFile(id, name) {
+      try {
+        const token = (gapi.client && gapi.client.getToken && gapi.client.getToken().access_token);
+        if (!token) throw new Error('No access token');
+        const url = `https://www.googleapis.com/drive/v3/files/${id}?alt=media`;
+        const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+        if (!res.ok) throw new Error('Download failed: ' + res.status);
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name || 'file';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      } catch (err) {
+        console.error(err);
+        showToast('Download failed', 'error');
+      }
+    }
+
+    // Queue & upload helpers
+    function queueFiles(files) {
+      files.forEach(f => {
+        const item = { file: f, uid: Date.now() + Math.random(), status: 'pending' };
+        state.uploadQueue.push(item);
+        renderUploadItem(item);
+      });
+      processQueue();
+    }
+
+    function renderUploadItem(item) {
+      const div = document.createElement('div');
+      div.className = 'upload-item';
+      div.id = `uitem-${item.uid}`;
+      div.innerHTML = `
+        <div style="width:36px; height:36px; border-radius:6px; background:var(--surface2); display:flex; align-items:center; justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+        </div>
+        <div class="upload-item-info">
+          <div class="upload-item-name">${esc(item.file.name)}</div>
+          <div style="font-family:var(--mono); font-size:11px; color:var(--text2)">${formatSize(item.file.size)}</div>
+          <div class="progress-bar"><div class="progress-fill" id="pfill-${item.uid}"></div></div>
+        </div>
+        <div style="min-width:90px; display:flex; align-items:center; justify-content:flex-end;">
+          <div id="ustatus-${item.uid}" style="font-family:var(--mono); font-weight:700; font-size:11px; color:var(--text3)">PENDING</div>
+        </div>
+      `;
+      uploadQueueEl.appendChild(div);
+    }
+
+    let activeUploads = 0;
+    function processQueue() {
+      const pending = state.uploadQueue.filter(i => i.status === 'pending');
+      pending.forEach(item => {
+        if (activeUploads >= 2) return;
+        activeUploads++;
+        item.status = 'uploading';
+        uploadFile(item).finally(() => {
+          activeUploads = Math.max(0, activeUploads - 1);
+          item.status = 'done';
+          const st = document.getElementById(`ustatus-${item.uid}`);
+          if (st) { st.textContent = 'DONE'; st.style.color = 'var(--accent)'; }
+          setTimeout(() => {
+            const el = document.getElementById(`uitem-${item.uid}`);
+            if (el) el.remove();
+          }, 1500);
+          processQueue();
+        });
+      });
+    }
+
+    async function uploadFile(item) {
+      const statusEl = document.getElementById(`ustatus-${item.uid}`);
+      const fillEl = document.getElementById(`pfill-${item.uid}`);
+      if (statusEl) { statusEl.textContent = 'UPLOADING'; statusEl.style.color = 'var(--yellow)'; }
+      try {
+        // Use gapi.client.drive.files.create with media parameter (works in gapi client)
+        const metadata = {
+          name: item.file.name,
+          parents: [state.currentFolderId]
+        };
+
+        // gapi.client.drive.files.create supports a 'media' param when using the JS client library
+        const res = await gapi.client.drive.files.create({
+          resource: metadata,
+          media: { body: item.file },
+          fields: 'id,name'
+        });
+
+        if (res && res.result && res.result.id) {
+          if (fillEl) fillEl.style.width = '100%';
+          showToast(`Uploaded ${res.result.name}`, 'success');
+          // refresh file list
+          loadFiles();
+        } else {
+          throw new Error('Upload failed');
+        }
+      } catch (err) {
+        console.error('upload error', err);
+        if (statusEl) { statusEl.textContent = 'ERROR'; statusEl.style.color = 'var(--red)'; }
+        showToast('Upload failed: ' + (err.message || err), 'error');
+      }
+    }
+
+    // Folder modal
+    function openFolderModal() {
+      folderModal.classList.add('open');
+      folderModal.style.display = 'flex';
+    }
+    function closeFolderModal() {
+      folderModal.classList.remove('open');
+      folderModal.style.display = 'none';
+    }
+    async function createFolder() {
+      const name = document.getElementById('folder-name-input').value.trim();
+      if (!name) return closeFolderModal();
+      closeFolderModal();
+      try {
+        const res = await gapi.client.drive.files.create({
+          resource: { name, mimeType: 'application/vnd.google-apps.folder', parents: [state.currentFolderId] },
+          fields: 'id,name'
+        });
+        showToast('Folder created', 'success');
+        loadFiles();
+      } catch (err) {
+        console.error('createFolder', err);
+        showToast('Failed to create folder', 'error');
+      }
+    }
+
+    // Utilities
+    function formatSize(b) {
+      if (!b && b !== 0) return '—';
+      const units = ['B','KB','MB','GB','TB'];
+      let i = 0;
+      let size = b;
+      while (size >= 1024 && i < units.length - 1) { size /= 1024; i++; }
+      return size.toFixed(size < 10 && i > 0 ? 1 : 0) + ' ' + units[i];
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function showToast(msg, type='info') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = 'toast' + (type ? ' ' + type : '');
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 5000);
+    }
+
+    // When the page loads, try to restore prior token (after gapi init)
+    (function initFlow() {
+      // Wait until gapi & gis are loaded; scripts are included below which call the handlers
+      const wait = setInterval(() => {
+        if (gapiLoaded && gisLoaded) {
+          clearInterval(wait);
+          // Attempt auto-restore (if a token exists in localStorage and is valid)
+          tryAutoRestore();
+        }
+      }, 200);
+    })();
+  </script>
+
+  <!-- Google APIs: gapi and GSI -->
+  <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoadedHandler()"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoadedHandler()"></script>
 </body>
 </html>
