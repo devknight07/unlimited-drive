@@ -93,7 +93,7 @@
             <div id="emptyState" class="hidden flex flex-col items-center justify-center h-full text-gray-400">
                 <i class="fas fa-folder-open text-6xl mb-4"></i>
                 <p class="text-lg">No files or folders found</p>
-                <p class="text-sm">Click the '+' button to get started</p>
+                <p class="text-sm">Click the '+' button or Sign In to get started</p>
             </div>
 
             <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
@@ -165,27 +165,41 @@
         }
 
         async function initializeGapiClient() {
-            await gapi.client.init({
-                apiKey: API_KEY,
-                discoveryDocs: [DISCOVERY_DOC],
-            });
-            gapiInited = true;
-            maybeEnableButtons();
+            try {
+                await gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: [DISCOVERY_DOC],
+                });
+                gapiInited = true;
+                maybeEnableButtons();
+            } catch (err) {
+                console.error("GAPI Init Error:", err);
+                showError("Failed to initialize Google API client. Please check your API key.");
+            }
         }
 
         function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: (resp) => {
-                    if (resp.error !== undefined) throw (resp);
-                    accessToken = resp.access_token;
-                    authBtnText.innerText = 'Sign Out';
-                    loadFiles();
-                },
-            });
-            gisInited = true;
-            maybeEnableButtons();
+            try {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID,
+                    scope: SCOPES,
+                    callback: (resp) => {
+                        if (resp.error !== undefined) {
+                            console.error("Auth Error:", resp);
+                            showError("Authentication failed: " + resp.error);
+                            throw (resp);
+                        }
+                        accessToken = resp.access_token;
+                        gapi.client.setToken(resp); // Set token for GAPI client
+                        authBtnText.innerText = 'Sign Out';
+                        loadFiles();
+                    },
+                });
+                gisInited = true;
+                maybeEnableButtons();
+            } catch (err) {
+                console.error("GIS Init Error:", err);
+            }
         }
 
         function maybeEnableButtons() {
@@ -203,6 +217,7 @@
                 if (token !== null) {
                     google.accounts.oauth2.revoke(token.access_token);
                     gapi.client.setToken('');
+                    accessToken = null;
                     authBtnText.innerText = 'Sign In';
                     grid.innerHTML = '';
                     emptyState.classList.remove('hidden');
@@ -212,6 +227,11 @@
 
         // Navigation & Listing
         async function loadFiles(folderId = currentFolderId) {
+            if (!accessToken) {
+                showError("Please Sign In first to access your files.");
+                return;
+            }
+
             currentFolderId = folderId;
             updateBreadcrumbs();
             showLoading(true);
@@ -226,8 +246,9 @@
                 const files = response.result.files;
                 renderFiles(files);
             } catch (err) {
-                console.error('Error loading files:', err);
-                showError("Failed to load files. Please check permissions.");
+                console.error('API Error:', err);
+                const errorMsg = err.result?.error?.message || "Check permissions or folder ID.";
+                showError(`Failed to load files: ${errorMsg}`);
             } finally {
                 showLoading(false);
             }
@@ -306,6 +327,7 @@
         // Create & Upload
         async function createFolder(name) {
             if (!name) return;
+            if (!accessToken) { showError("Sign In required."); return; }
             try {
                 showLoading(true);
                 await gapi.client.drive.files.create({
@@ -318,13 +340,14 @@
                 closeModal();
                 loadFiles();
             } catch (err) {
-                showError("Could not create folder.");
+                showError("Could not create folder. Check permissions.");
             } finally {
                 showLoading(false);
             }
         }
 
         async function uploadFile(file) {
+            if (!accessToken) { showError("Sign In required."); return; }
             try {
                 showLoading(true);
                 const metadata = {
@@ -345,10 +368,11 @@
                 if (response.ok) {
                     loadFiles();
                 } else {
-                    throw new Error("Upload failed");
+                    const error = await response.json();
+                    throw new Error(error.error.message);
                 }
             } catch (err) {
-                showError("File upload failed.");
+                showError("File upload failed: " + err.message);
             } finally {
                 showLoading(false);
             }
@@ -422,7 +446,7 @@
                 await gapi.client.drive.files.delete({ fileId: fileId });
                 loadFiles();
             } catch (err) {
-                showError("Could not delete file.");
+                showError("Could not delete file. Check permissions.");
             } finally {
                 showLoading(false);
             }
@@ -455,7 +479,6 @@
             input.select();
             document.execCommand('copy');
             document.body.removeChild(input);
-            // In-app notification could be added here
         }
 
         // Drag and Drop
@@ -478,6 +501,7 @@
             if (e.key === 'Enter') {
                 const query = e.target.value;
                 if (!query) { loadFiles(); return; }
+                if (!accessToken) { showError("Sign In required."); return; }
                 
                 showLoading(true);
                 try {
