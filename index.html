@@ -217,6 +217,39 @@
 
   .file-card.folder .file-icon { filter: drop-shadow(0 0 8px rgba(108,99,255,0.4)); }
 
+  /* ─── FILE ACTIONS ─────────────────────────────────── */
+  .file-actions {
+    position: absolute; top: 10px; right: 10px;
+    display: flex; gap: 4px; z-index: 10;
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .file-card:hover .file-actions { opacity: 1; }
+  
+  .action-btn {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border); display: flex;
+    align-items: center; justify-content: center; cursor: pointer;
+    transition: all 0.2s; font-size: 13px; text-decoration: none;
+  }
+  .action-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .action-btn.danger:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+  .file-icon img {
+    width: 48px; height: 48px; border-radius: 8px;
+    object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  /* ─── TOOLBAR RIGHT ────────────────────────────────── */
+  .toolbar-right select {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-family: var(--font); font-size: 13px;
+    outline: none; cursor: pointer; transition: all 0.2s;
+  }
+  .toolbar-right select:hover { border-color: var(--border-lit); }
+  .toolbar-right select:focus { border-color: var(--accent); }
+
   /* ─── EMPTY STATE ─────────────────────────────────── */
   .empty {
     grid-column: 1/-1;
@@ -491,6 +524,15 @@
         Refresh
       </button>
     </div>
+    <div class="toolbar-right">
+      <select id="sort-by" onchange="changeSortBy(this.value)">
+        <option value="name">Name</option>
+        <option value="modifiedTime">Date Modified</option>
+        <option value="quotaBytesUsed">Size</option>
+        <option value="mimeType">Type</option>
+      </select>
+      <button class="btn btn-ghost" id="sort-dir-btn" onclick="toggleSortDir()" style="padding: 8px 12px;">↓</button>
+    </div>
   </div>
 
   <!-- Section header -->
@@ -521,6 +563,21 @@
   </div>
 </div>
 
+<!-- Rename Modal -->
+<div class="modal-overlay" id="rename-modal">
+  <div class="modal">
+    <h3>✏️ Rename</h3>
+    <div class="input-group">
+      <label>New Name</label>
+      <input type="text" id="rename-input" placeholder="Enter new name…" onkeydown="if(event.key==='Enter')renameFile()"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeRenameModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="renameFile()">Rename</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast Container -->
 <div id="toast-container"></div>
 
@@ -537,6 +594,9 @@ let tokenClient, gapiInited = false, gisInited = false;
 let currentFolderId = ROOT_ID;
 let folderStack = [{ id: ROOT_ID, name: 'My Drive' }];
 let uploadItems = {};
+let currentSortBy = 'name';
+let currentSortDir = 'asc';
+let itemToRename = null;
 
 // ─── NETWORK SPEED ────────────────────────────────────────────────
 async function measureSpeed() {
@@ -659,15 +719,30 @@ function signOut() {
 }
 
 // ─── FILE LISTING ─────────────────────────────────────────────────
+function changeSortBy(val) {
+  currentSortBy = val;
+  loadFiles(currentFolderId);
+}
+
+function toggleSortDir() {
+  currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+  document.getElementById('sort-dir-btn').textContent = currentSortDir === 'asc' ? '↓' : '↑';
+  loadFiles(currentFolderId);
+}
+
 async function loadFiles(folderId) {
   document.getElementById('file-list').innerHTML =
     '<div class="loading"><div class="spinner"></div><span>Loading…</span></div>';
 
+  const sortOrderStr = currentSortBy === 'name' ? 
+    `folder,name ${currentSortDir === 'asc' ? '' : 'desc'}` : 
+    `folder,${currentSortBy} ${currentSortDir === 'asc' ? '' : 'desc'}`;
+
   try {
     const res = await gapi.client.drive.files.list({
       q: `'${folderId}' in parents and trashed=false`,
-      fields: 'files(id,name,mimeType,size,modifiedTime,iconLink)',
-      orderBy: 'folder,name',
+      fields: 'files(id,name,mimeType,size,modifiedTime,iconLink,hasThumbnail,thumbnailLink,webContentLink,capabilities)',
+      orderBy: sortOrderStr.trim(),
       pageSize: 100,
     });
     renderFiles(res.result.files || []);
@@ -689,13 +764,35 @@ function renderFiles(files) {
 
   container.innerHTML = files.map(f => {
     const isFolder = f.mimeType === 'application/vnd.google-apps.folder';
-    const icon = isFolder ? '📁' : getIcon(f.mimeType, f.name);
+    
+    let iconHTML = `<div class="file-icon">${isFolder ? '📁' : getIcon(f.mimeType, f.name)}</div>`;
+    if (f.hasThumbnail && f.thumbnailLink) {
+      iconHTML = `<div class="file-icon"><img src="${f.thumbnailLink}" alt="thumbnail"/></div>`;
+    }
+
     const size = f.size ? fmtBytes(f.size) : '';
     const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString() : '';
+    
+    const canRename = f.capabilities && f.capabilities.canRename;
+    const canDelete = f.capabilities && f.capabilities.canDelete;
+    
+    let actionsHTML = '<div class="file-actions" onclick="event.stopPropagation()">';
+    if (!isFolder && f.webContentLink) {
+      actionsHTML += `<a href="${f.webContentLink}" target="_blank" class="action-btn" title="Download">⬇️</a>`;
+    }
+    if (canRename) {
+      actionsHTML += `<button class="action-btn" title="Rename" onclick="openRenameModal('${f.id}', '${esc(f.name)}')">✏️</button>`;
+    }
+    if (canDelete) {
+      actionsHTML += `<button class="action-btn danger" title="Delete" onclick="deleteFile('${f.id}', '${esc(f.name)}')">🗑️</button>`;
+    }
+    actionsHTML += '</div>';
+
     return `
       <div class="file-card ${isFolder ? 'folder' : ''}" onclick="${isFolder ? `navigateIn('${f.id}','${esc(f.name)}')` : ''}">
-        <div class="file-icon">${icon}</div>
-        <div class="file-name">${esc(f.name)}</div>
+        ${actionsHTML}
+        ${iconHTML}
+        <div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div>
         <div class="file-meta">${[size, date].filter(Boolean).join(' · ')}</div>
       </div>`;
   }).join('');
@@ -897,9 +994,58 @@ function toast(msg, type = 'info') {
   setTimeout(() => el.remove(), 4000);
 }
 
+// ─── RENAME & DELETE ──────────────────────────────────────────────
+function openRenameModal(id, name) {
+  itemToRename = { id, name };
+  document.getElementById('rename-modal').classList.add('open');
+  const input = document.getElementById('rename-input');
+  input.value = name;
+  setTimeout(() => { input.focus(); input.select(); }, 100);
+}
+
+function closeRenameModal() {
+  document.getElementById('rename-modal').classList.remove('open');
+  itemToRename = null;
+}
+
+async function renameFile() {
+  if (!itemToRename) return;
+  const newName = document.getElementById('rename-input').value.trim();
+  if (!newName || newName === itemToRename.name) {
+    closeRenameModal();
+    return;
+  }
+  const id = itemToRename.id;
+  closeRenameModal();
+  try {
+    await gapi.client.drive.files.update({
+      fileId: id,
+      resource: { name: newName }
+    });
+    toast(`Renamed to "${newName}"`, 'success');
+    loadFiles(currentFolderId);
+  } catch (e) {
+    toast('Failed to rename', 'error');
+  }
+}
+
+async function deleteFile(id, name) {
+  if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+  try {
+    await gapi.client.drive.files.delete({ fileId: id });
+    toast(`Deleted "${name}"`, 'success');
+    loadFiles(currentFolderId);
+  } catch (e) {
+    toast('Failed to delete', 'error');
+  }
+}
+
 // Close modal on overlay click
 document.getElementById('folder-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
+});
+document.getElementById('rename-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeRenameModal();
 });
 </script>
 
