@@ -999,13 +999,31 @@ async function loadFiles(folderId) {
     : `folder,${currentSortBy} ${currentSortDir === 'asc' ? '' : 'desc'}`;
 
   try {
-    const res = await gapi.client.drive.files.list({
-      q: `'${folderId}' in parents and trashed=false`,
-      fields: 'files(id,name,mimeType,size,modifiedTime,iconLink,hasThumbnail,thumbnailLink,webContentLink,webViewLink,capabilities)',
-      orderBy: sortOrderStr.trim(),
-      pageSize: 100,
-    });
-    renderFiles(res.result.files || []);
+    let allFiles = [];
+    let pageToken = null;
+
+    do {
+      const params = {
+        q: `'${folderId}' in parents and trashed=false`,
+        fields: 'nextPageToken,files(id,name,mimeType,size,modifiedTime,hasThumbnail,thumbnailLink,webContentLink,webViewLink,capabilities)',
+        orderBy: sortOrderStr.trim(),
+        pageSize: 1000,
+      };
+      if (pageToken) params.pageToken = pageToken;
+
+      const res = await gapi.client.drive.files.list(params);
+      const batch = res.result.files || [];
+      allFiles = allFiles.concat(batch);
+      pageToken = res.result.nextPageToken || null;
+
+      // Show incremental progress while more pages remain
+      if (pageToken) {
+        document.getElementById('file-list').innerHTML =
+          `<div class="loading"><div class="spinner"></div><span>Loading… ${allFiles.length} items</span></div>`;
+      }
+    } while (pageToken);
+
+    renderFiles(allFiles);
   } catch (e) {
     document.getElementById('file-list').innerHTML =
       '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Failed to load files</p></div>';
