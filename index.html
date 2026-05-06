@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="theme-color" content="#0a0a0f"/>
 <meta name="description" content="DriveVault — Secure Google Drive File Manager"/>
-<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;DriveVault&quot;,&quot;short_name&quot;:&quot;DriveVault&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%230a0a0f&quot;,&quot;theme_color&quot;:&quot;%230a0a0f&quot;}"/>
 <title>DriveVault</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -50,38 +49,43 @@
   header {
     position: sticky; top: 0; z-index: 100;
     backdrop-filter: blur(20px);
-    background: rgba(10,10,15,0.85);
+    background: rgba(10,10,15,0.9);
     border-bottom: 1px solid var(--border);
-    padding: 14px 28px;
-    display: flex; align-items: center; gap: 16px;
+    padding: 12px 20px;
+    display: flex; align-items: center; gap: 12px;
   }
 
   .logo {
-    font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+    font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
     background: linear-gradient(135deg, var(--accent), var(--accent3));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background-clip: text; white-space: nowrap;
   }
 
   .logo span { font-weight: 400; opacity: 0.6; }
 
   .header-right {
-    margin-left: auto; display: flex; align-items: center; gap: 12px;
+    margin-left: auto; display: flex; align-items: center; gap: 8px;
   }
 
   .net-badge {
-    display: flex; align-items: center; gap: 6px;
-    font-family: var(--mono); font-size: 11px;
-    color: var(--accent3); padding: 5px 10px;
+    display: flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 10px;
+    color: var(--accent3); padding: 4px 8px;
     border: 1px solid rgba(67,217,173,0.2);
     border-radius: 20px; background: rgba(67,217,173,0.05);
-    transition: all 0.3s;
+    white-space: nowrap;
   }
 
   .net-badge .dot {
-    width: 6px; height: 6px; border-radius: 50%;
+    width: 5px; height: 5px; border-radius: 50%;
     background: var(--accent3);
-    animation: pulse 2s infinite;
+    animation: pulse 2s infinite; flex-shrink: 0;
+  }
+
+  @media (max-width: 480px) {
+    .net-badge { display: none; }
+    .logo { font-size: 18px; }
   }
 
   @keyframes pulse {
@@ -90,11 +94,14 @@
   }
 
   .btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 9px 18px; border-radius: 8px; font-family: var(--font);
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 8px; font-family: var(--font);
     font-size: 13px; font-weight: 600; cursor: pointer;
     border: none; transition: all 0.2s; text-decoration: none;
+    white-space: nowrap;
   }
+
+  .btn svg { flex-shrink: 0; }
 
   .btn-primary {
     background: var(--accent); color: #fff;
@@ -111,14 +118,25 @@
   .btn-danger {
     background: rgba(255,101,132,0.15); color: var(--accent2);
     border: 1px solid rgba(255,101,132,0.3);
+    padding: 7px 12px;
   }
   .btn-danger:hover { background: rgba(255,101,132,0.25); }
+
+  @media (max-width: 480px) {
+    .btn { padding: 7px 10px; font-size: 12px; }
+    .btn-text { display: none; }
+    .btn-danger .btn-text { display: none; }
+  }
 
   /* ─── MAIN LAYOUT ─────────────────────────────────── */
   main {
     position: relative; z-index: 1;
     max-width: 1100px; margin: 0 auto;
-    padding: 32px 24px;
+    padding: 24px 16px;
+  }
+
+  @media (min-width: 768px) {
+    main { padding: 32px 24px; }
   }
 
   /* ─── AUTH SCREEN ─────────────────────────────────── */
@@ -126,88 +144,164 @@
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     min-height: calc(100vh - 65px); text-align: center; gap: 24px;
+    padding: 20px;
   }
 
   .auth-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 20px; padding: 52px 48px;
-    max-width: 440px; width: 100%;
+    border-radius: 20px; padding: 36px 28px;
+    max-width: 420px; width: 100%;
     box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+  }
+
+  @media (min-width: 480px) {
+    .auth-card { padding: 52px 48px; }
   }
 
   .auth-icon {
     width: 72px; height: 72px; margin: 0 auto 24px;
     background: linear-gradient(135deg, var(--accent), var(--accent3));
     border-radius: 20px; display: flex; align-items: center; justify-content: center;
-    font-size: 32px;
   }
 
-  .auth-card h2 { font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+  .auth-card h2 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
   .auth-card p { color: var(--text-dim); font-size: 14px; line-height: 1.7; margin-bottom: 28px; }
 
   /* ─── BREADCRUMB ──────────────────────────────────── */
   .breadcrumb {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 4px;
     font-size: 13px; color: var(--text-dim);
-    margin-bottom: 24px; flex-wrap: wrap;
+    margin-bottom: 20px; flex-wrap: wrap;
+    overflow-x: auto; padding-bottom: 2px;
   }
 
   .breadcrumb-item {
     cursor: pointer; padding: 3px 8px; border-radius: 6px;
-    transition: all 0.15s;
+    transition: all 0.15s; white-space: nowrap;
   }
   .breadcrumb-item:hover { color: var(--text); background: var(--surface); }
   .breadcrumb-item.active { color: var(--text); font-weight: 600; cursor: default; }
   .breadcrumb-item.active:hover { background: transparent; }
-
   .breadcrumb-sep { color: var(--text-muted); }
 
   /* ─── TOOLBAR ─────────────────────────────────────── */
   .toolbar {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 20px; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 18px; flex-wrap: wrap;
   }
 
-  .toolbar-left { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; }
-  .toolbar-right { display: flex; gap: 10px; }
+  .toolbar-left { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; }
+  .toolbar-right { display: flex; gap: 8px; align-items: center; }
+
+  .toolbar-right select {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px; font-family: var(--font); font-size: 12px;
+    outline: none; cursor: pointer; transition: all 0.2s;
+    max-width: 130px;
+  }
+  .toolbar-right select:hover { border-color: var(--border-lit); }
+  .toolbar-right select:focus { border-color: var(--accent); }
 
   /* ─── GRID / FILE LIST ────────────────────────────── */
   .file-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  @media (min-width: 480px) {
+    .file-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+  }
+
+  @media (min-width: 768px) {
+    .file-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
   }
 
   .file-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 18px 16px;
+    border-radius: var(--radius); padding: 0;
     cursor: pointer; transition: all 0.2s;
-    display: flex; flex-direction: column; gap: 10px;
+    display: flex; flex-direction: column;
     position: relative; overflow: hidden;
   }
 
   .file-card::after {
     content: ''; position: absolute; inset: 0;
     background: linear-gradient(135deg, rgba(108,99,255,0.05), transparent);
-    opacity: 0; transition: opacity 0.2s;
+    opacity: 0; transition: opacity 0.2s; pointer-events: none;
   }
 
   .file-card:hover {
     border-color: var(--border-lit);
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
   }
   .file-card:hover::after { opacity: 1; }
 
-  .file-icon {
-    font-size: 36px; line-height: 1;
+  /* Preview area - large thumbnail */
+  .file-preview {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; border-radius: var(--radius) var(--radius) 0 0;
+    position: relative;
+  }
+
+  .file-preview img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .file-card:hover .file-preview img { transform: scale(1.04); }
+
+  .file-preview-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+  }
+
+  .file-preview-icon svg {
+    width: 52px; height: 52px; opacity: 0.55;
+  }
+
+  @media (min-width: 480px) {
+    .file-preview-icon svg { width: 60px; height: 60px; }
+  }
+
+  .file-card.folder .file-preview {
+    background: rgba(108,99,255,0.06);
+  }
+
+  .file-card.folder .file-preview-icon svg {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 12px rgba(108,99,255,0.4));
+  }
+
+  /* Video play overlay */
+  .preview-play-badge {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.25);
+  }
+
+  .preview-play-badge svg {
+    width: 38px; height: 38px;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+  }
+
+  .file-info {
+    padding: 12px 12px 10px;
+    display: flex; flex-direction: column; gap: 4px;
   }
 
   .file-name {
-    font-size: 13px; font-weight: 600; word-break: break-word;
+    font-size: 12px; font-weight: 600; word-break: break-word;
     color: var(--text); line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
   }
 
   .file-meta {
@@ -215,58 +309,41 @@
     color: var(--text-muted);
   }
 
-  .file-card.folder .file-icon { filter: drop-shadow(0 0 8px rgba(108,99,255,0.4)); }
-
   /* ─── FILE ACTIONS ─────────────────────────────────── */
   .file-actions {
-    position: absolute; top: 10px; right: 10px;
+    position: absolute; top: 8px; right: 8px;
     display: flex; gap: 4px; z-index: 10;
     opacity: 0; transition: opacity 0.2s;
   }
   .file-card:hover .file-actions { opacity: 1; }
-  
+
+  @media (hover: none) {
+    .file-actions { opacity: 1; }
+  }
+
   .action-btn {
-    width: 26px; height: 26px; border-radius: 6px;
-    background: var(--surface2); color: var(--text);
-    border: 1px solid var(--border); display: flex;
+    width: 28px; height: 28px; border-radius: 6px;
+    background: rgba(10,10,15,0.8); color: var(--text);
+    border: 1px solid var(--border-lit); display: flex;
     align-items: center; justify-content: center; cursor: pointer;
-    transition: all 0.2s; font-size: 13px; text-decoration: none;
+    transition: all 0.2s; text-decoration: none;
+    backdrop-filter: blur(8px);
   }
   .action-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
   .action-btn.danger:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
-
-  .file-icon img {
-    width: 48px; height: 48px; border-radius: 8px;
-    object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  }
-
-  /* ─── TOOLBAR RIGHT ────────────────────────────────── */
-  .toolbar-right select {
-    background: var(--surface); color: var(--text);
-    border: 1px solid var(--border); border-radius: 8px;
-    padding: 8px 12px; font-family: var(--font); font-size: 13px;
-    outline: none; cursor: pointer; transition: all 0.2s;
-  }
-  .toolbar-right select:hover { border-color: var(--border-lit); }
-  .toolbar-right select:focus { border-color: var(--accent); }
-
-  /* ─── EMPTY STATE ─────────────────────────────────── */
-  .empty {
-    grid-column: 1/-1;
-    display: flex; flex-direction: column; align-items: center;
-    padding: 60px 20px; color: var(--text-muted); gap: 12px;
-    text-align: center;
-  }
-  .empty .empty-icon { font-size: 48px; opacity: 0.4; }
-  .empty p { font-size: 14px; }
+  .action-btn svg { width: 13px; height: 13px; }
 
   /* ─── UPLOAD ZONE ─────────────────────────────────── */
   .upload-zone {
     border: 2px dashed var(--border);
-    border-radius: 16px; padding: 40px 24px;
+    border-radius: 14px; padding: 30px 20px;
     text-align: center; cursor: pointer;
-    transition: all 0.25s; margin-bottom: 28px;
+    transition: all 0.25s; margin-bottom: 24px;
     position: relative; background: transparent;
+  }
+
+  @media (min-width: 768px) {
+    .upload-zone { padding: 40px 24px; }
   }
 
   .upload-zone.dragover {
@@ -279,8 +356,9 @@
     position: absolute; inset: 0; opacity: 0; cursor: pointer;
   }
 
-  .upload-zone-icon { font-size: 40px; margin-bottom: 12px; }
-  .upload-zone h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .upload-zone-icon { margin-bottom: 12px; display: flex; justify-content: center; }
+  .upload-zone-icon svg { width: 40px; height: 40px; color: var(--text-muted); }
+  .upload-zone h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
   .upload-zone p { font-size: 13px; color: var(--text-dim); }
 
   /* ─── UPLOAD QUEUE ────────────────────────────────── */
@@ -289,7 +367,7 @@
   .upload-item {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px 16px;
+    border-radius: 10px; padding: 12px 14px;
     display: grid; gap: 8px;
     animation: slideIn 0.25s ease;
   }
@@ -299,55 +377,37 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  .upload-item-top {
-    display: flex; align-items: center; gap: 10px;
-  }
-
-  .upload-item-icon { font-size: 20px; }
-
+  .upload-item-top { display: flex; align-items: center; gap: 10px; }
+  .upload-item-icon { flex-shrink: 0; color: var(--text-muted); }
+  .upload-item-icon svg { width: 20px; height: 20px; }
   .upload-item-info { flex: 1; min-width: 0; }
   .upload-item-name {
     font-size: 13px; font-weight: 600;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .upload-item-size {
-    font-family: var(--mono); font-size: 10px; color: var(--text-dim);
-  }
+  .upload-item-size { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
 
   .upload-status {
     font-size: 11px; font-family: var(--mono);
-    padding: 3px 8px; border-radius: 4px;
-    white-space: nowrap;
+    padding: 3px 8px; border-radius: 4px; white-space: nowrap;
   }
   .upload-status.uploading { color: var(--accent); background: rgba(108,99,255,0.1); }
   .upload-status.done { color: var(--accent3); background: rgba(67,217,173,0.1); }
   .upload-status.error { color: var(--accent2); background: rgba(255,101,132,0.1); }
   .upload-status.pending { color: var(--text-muted); background: var(--surface2); }
 
-  /* ─── PROGRESS BAR ────────────────────────────────── */
-  .progress-track {
-    height: 3px; background: var(--surface2);
-    border-radius: 2px; overflow: hidden;
-  }
-
+  .progress-track { height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
   .progress-fill {
     height: 100%; border-radius: 2px;
     background: linear-gradient(90deg, var(--accent), var(--accent3));
-    transition: width 0.2s ease;
-    position: relative; overflow: hidden;
+    transition: width 0.2s ease; position: relative; overflow: hidden;
   }
-
   .progress-fill::after {
-    content: ''; position: absolute; top: 0; right: 0; bottom: 0;
-    width: 60px;
+    content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 60px;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
     animation: shimmer 1.2s infinite;
   }
-
-  @keyframes shimmer {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(200%); }
-  }
+  @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(200%); } }
 
   .upload-item-bottom {
     display: flex; justify-content: space-between;
@@ -359,49 +419,45 @@
     position: fixed; inset: 0; z-index: 200;
     background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
     display: flex; align-items: center; justify-content: center;
-    padding: 20px; opacity: 0; pointer-events: none;
+    padding: 16px; opacity: 0; pointer-events: none;
     transition: opacity 0.2s;
   }
-
   .modal-overlay.open { opacity: 1; pointer-events: all; }
 
   .modal {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 28px; width: 100%; max-width: 400px;
+    border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;
     transform: scale(0.95); transition: transform 0.2s;
   }
-
   .modal-overlay.open .modal { transform: scale(1); }
-
-  .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+  .modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
 
   .input-group { margin-bottom: 16px; }
-  .input-group label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .input-group label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   .input-group input {
     width: 100%; background: var(--bg); border: 1px solid var(--border);
     border-radius: 8px; padding: 10px 14px; color: var(--text);
-    font-family: var(--font); font-size: 14px; outline: none;
-    transition: border-color 0.2s;
+    font-family: var(--font); font-size: 14px; outline: none; transition: border-color 0.2s;
   }
   .input-group input:focus { border-color: var(--accent); }
-
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
   /* ─── TOAST ───────────────────────────────────────── */
   #toast-container {
-    position: fixed; bottom: 24px; right: 24px; z-index: 300;
+    position: fixed; bottom: 20px; right: 16px; z-index: 500;
     display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+    max-width: calc(100vw - 32px);
   }
 
   .toast {
     background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 16px;
-    font-size: 13px; max-width: 320px;
-    display: flex; align-items: center; gap: 10px;
+    border-radius: 10px; padding: 11px 14px;
+    font-size: 13px; max-width: 300px;
+    display: flex; align-items: center; gap: 8px;
     animation: toastIn 0.3s ease;
     box-shadow: 0 8px 30px rgba(0,0,0,0.4);
   }
-
+  .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
   .toast.success { border-color: rgba(67,217,173,0.3); }
   .toast.error { border-color: rgba(255,101,132,0.3); }
 
@@ -412,8 +468,9 @@
 
   /* ─── LOADING ─────────────────────────────────────── */
   .loading {
+    grid-column: 1/-1;
     display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 16px; padding: 60px;
+    justify-content: center; gap: 16px; padding: 60px 20px;
     color: var(--text-dim); font-size: 14px;
   }
 
@@ -423,46 +480,198 @@
     border-top-color: var(--accent);
     animation: spin 0.8s linear infinite;
   }
-
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ─── SECTION LABEL ───────────────────────────────── */
-  .section-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  .section-label {
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
-    text-transform: uppercase; color: var(--text-muted);
-  }
-
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
   .section-line { flex: 1; height: 1px; background: var(--border); }
-
-  .count-badge {
-    font-family: var(--mono); font-size: 11px;
-    color: var(--accent); background: rgba(108,99,255,0.1);
-    padding: 2px 7px; border-radius: 10px;
-  }
+  .count-badge { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(108,99,255,0.1); padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
 
   /* ─── USER PILL ───────────────────────────────────── */
   .user-pill {
-    display: flex; align-items: center; gap: 8px;
-    padding: 6px 12px; border-radius: 20px;
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 20px;
     background: var(--surface); border: 1px solid var(--border);
   }
 
   .user-avatar {
-    width: 24px; height: 24px; border-radius: 50%;
+    width: 22px; height: 22px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
   }
 
   .user-name { font-size: 12px; font-weight: 600; }
 
+  @media (max-width: 480px) {
+    .user-name { display: none; }
+    .user-pill { padding: 5px; }
+  }
+
+  /* ─── EMPTY STATE ─────────────────────────────────── */
+  .empty {
+    grid-column: 1/-1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 60px 20px; color: var(--text-muted); gap: 12px;
+    text-align: center;
+  }
+  .empty svg { width: 48px; height: 48px; opacity: 0.3; }
+  .empty p { font-size: 14px; }
+
   #app-screen { display: none; }
   .hidden { display: none !important; }
+
+  /* ─── LIGHTBOX / PREVIEW POPUP ───────────────────── */
+  #lightbox {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.95);
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  #lightbox.open { opacity: 1; pointer-events: all; }
+
+  .lb-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    background: rgba(10,10,15,0.8);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    z-index: 10; flex-shrink: 0;
+  }
+
+  .lb-title {
+    flex: 1; font-size: 14px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .lb-meta {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--text-muted); white-space: nowrap;
+  }
+
+  .lb-counter {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--text-dim); padding: 3px 10px;
+    background: var(--surface2); border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .lb-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  }
+  .lb-btn:hover { background: var(--surface); border-color: var(--border-lit); }
+  .lb-btn svg { width: 16px; height: 16px; }
+  .lb-btn.download { color: var(--accent3); border-color: rgba(67,217,173,0.3); }
+  .lb-btn.download:hover { background: rgba(67,217,173,0.1); }
+  .lb-btn.close-btn { color: var(--accent2); border-color: rgba(255,101,132,0.3); }
+  .lb-btn.close-btn:hover { background: rgba(255,101,132,0.15); }
+
+  .lb-body {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden; min-height: 0;
+  }
+
+  .lb-media-wrap {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%; padding: 20px;
+  }
+
+  #lb-image {
+    max-width: 100%; max-height: 100%;
+    object-fit: contain; border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    display: none; animation: lbFadeIn 0.2s ease;
+  }
+
+  #lb-video {
+    max-width: 100%; max-height: 100%;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    display: none; animation: lbFadeIn 0.2s ease;
+  }
+
+  #lb-generic {
+    display: none; flex-direction: column; align-items: center;
+    gap: 16px; color: var(--text-dim); text-align: center;
+    animation: lbFadeIn 0.2s ease;
+  }
+
+  #lb-generic svg { width: 80px; height: 80px; opacity: 0.3; }
+  #lb-generic p { font-size: 14px; }
+
+  @keyframes lbFadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Nav arrows */
+  .lb-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    z-index: 20;
+  }
+
+  .lb-nav.prev { left: 12px; }
+  .lb-nav.next { right: 12px; }
+
+  .lb-nav-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(19,19,26,0.85); border: 1px solid var(--border-lit);
+    color: var(--text); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; backdrop-filter: blur(8px);
+  }
+
+  .lb-nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: scale(1.1); }
+  .lb-nav-btn:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+  .lb-nav-btn svg { width: 20px; height: 20px; }
+
+  @media (min-width: 600px) {
+    .lb-nav.prev { left: 24px; }
+    .lb-nav.next { right: 24px; }
+    .lb-nav-btn { width: 50px; height: 50px; }
+    .lb-nav-btn svg { width: 24px; height: 24px; }
+  }
+
+  /* Filmstrip */
+  .lb-strip {
+    display: flex; gap: 6px; padding: 10px 14px;
+    background: rgba(10,10,15,0.8); border-top: 1px solid var(--border);
+    overflow-x: auto; flex-shrink: 0;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+
+  .lb-strip::-webkit-scrollbar { height: 4px; }
+  .lb-strip::-webkit-scrollbar-track { background: transparent; }
+  .lb-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .lb-thumb {
+    width: 48px; height: 48px; border-radius: 6px;
+    border: 2px solid transparent; flex-shrink: 0;
+    cursor: pointer; overflow: hidden; transition: all 0.15s;
+    background: var(--surface2); display: flex; align-items: center; justify-content: center;
+  }
+
+  .lb-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .lb-thumb svg { width: 20px; height: 20px; opacity: 0.5; }
+  .lb-thumb.active { border-color: var(--accent); }
+  .lb-thumb:hover { border-color: var(--border-lit); }
+
+  /* Touch swipe hint */
+  .lb-swipe-hint {
+    position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; color: var(--text-muted); font-family: var(--mono);
+    pointer-events: none; opacity: 0; animation: hintFade 3s ease 0.5s forwards;
+  }
+
+  @keyframes hintFade {
+    0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; }
+  }
 </style>
 </head>
 <body>
@@ -479,14 +688,19 @@
       <div class="user-avatar" id="user-avatar">?</div>
       <span class="user-name" id="user-name">User</span>
     </div>
-    <button class="btn btn-danger hidden" id="signout-btn" onclick="signOut()">Sign Out</button>
+    <button class="btn btn-danger hidden" id="signout-btn" onclick="signOut()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span class="btn-text">Sign Out</span>
+    </button>
   </div>
 </header>
 
 <!-- AUTH SCREEN -->
 <main id="auth-screen">
   <div class="auth-card">
-    <div class="auth-icon">🔐</div>
+    <div class="auth-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="38" height="38"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
     <h2>DriveVault</h2>
     <p>Connect your Google account to securely manage and upload files directly to your designated Drive folder.</p>
     <button class="btn btn-primary" id="signin-btn" onclick="signIn()" style="width:100%;justify-content:center;font-size:15px;padding:13px;">
@@ -498,30 +712,28 @@
 
 <!-- APP SCREEN -->
 <main id="app-screen">
-  <!-- Breadcrumb -->
   <div class="breadcrumb" id="breadcrumb"></div>
 
-  <!-- Upload Zone -->
   <div class="upload-zone" id="upload-zone">
     <input type="file" id="file-input" multiple onchange="handleFileSelect(event)"/>
-    <div class="upload-zone-icon">📁</div>
+    <div class="upload-zone-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </div>
     <h3>Drop files here or click to upload</h3>
     <p>Upload any file type to the current folder</p>
   </div>
 
-  <!-- Upload Queue -->
   <div id="upload-queue" class="upload-queue"></div>
 
-  <!-- Toolbar -->
   <div class="toolbar">
     <div class="toolbar-left">
       <button class="btn btn-primary" onclick="openCreateFolder()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
-        New Folder
+        <span class="btn-text">New Folder</span>
       </button>
       <button class="btn btn-ghost" onclick="loadFiles(currentFolderId)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        Refresh
+        <span class="btn-text">Refresh</span>
       </button>
     </div>
     <div class="toolbar-right">
@@ -531,18 +743,18 @@
         <option value="quotaBytesUsed">Size</option>
         <option value="mimeType">Type</option>
       </select>
-      <button class="btn btn-ghost" id="sort-dir-btn" onclick="toggleSortDir()" style="padding: 8px 12px;">↓</button>
+      <button class="btn btn-ghost" id="sort-dir-btn" onclick="toggleSortDir()" style="padding:8px 10px;min-width:36px;">
+        <svg id="sort-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+      </button>
     </div>
   </div>
 
-  <!-- Section header -->
   <div class="section-header">
     <span class="section-label">Contents</span>
     <div class="section-line"></div>
     <span class="count-badge" id="file-count">0 items</span>
   </div>
 
-  <!-- File Grid -->
   <div id="file-list" class="file-grid">
     <div class="loading"><div class="spinner"></div><span>Loading files…</span></div>
   </div>
@@ -551,7 +763,7 @@
 <!-- Create Folder Modal -->
 <div class="modal-overlay" id="folder-modal">
   <div class="modal">
-    <h3>📂 New Folder</h3>
+    <h3>New Folder</h3>
     <div class="input-group">
       <label>Folder Name</label>
       <input type="text" id="folder-name-input" placeholder="Enter folder name…" onkeydown="if(event.key==='Enter')createFolder()"/>
@@ -566,7 +778,7 @@
 <!-- Rename Modal -->
 <div class="modal-overlay" id="rename-modal">
   <div class="modal">
-    <h3>✏️ Rename</h3>
+    <h3>Rename</h3>
     <div class="input-group">
       <label>New Name</label>
       <input type="text" id="rename-input" placeholder="Enter new name…" onkeydown="if(event.key==='Enter')renameFile()"/>
@@ -576,6 +788,52 @@
       <button class="btn btn-primary" onclick="renameFile()">Rename</button>
     </div>
   </div>
+</div>
+
+<!-- ─── LIGHTBOX ─── -->
+<div id="lightbox">
+  <div class="lb-header">
+    <div class="lb-title" id="lb-title">File</div>
+    <div class="lb-meta" id="lb-meta"></div>
+    <div class="lb-counter" id="lb-counter">1 / 1</div>
+    <a class="lb-btn download" id="lb-download" href="#" target="_blank" download title="Download">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </a>
+    <button class="lb-btn close-btn" onclick="closeLightbox()" title="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="lb-body">
+    <div class="lb-nav prev">
+      <button class="lb-nav-btn" id="lb-prev" onclick="lbNavigate(-1)" title="Previous">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </div>
+
+    <div class="lb-media-wrap">
+      <img id="lb-image" src="" alt=""/>
+      <video id="lb-video" controls playsinline></video>
+      <div id="lb-generic" style="display:none;flex-direction:column;align-items:center;gap:16px;color:var(--text-dim);text-align:center;">
+        <div id="lb-generic-icon"></div>
+        <p id="lb-generic-label">Preview not available</p>
+        <a id="lb-generic-download" href="#" class="btn btn-primary" target="_blank">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download File
+        </a>
+      </div>
+    </div>
+
+    <div class="lb-nav next">
+      <button class="lb-nav-btn" id="lb-next" onclick="lbNavigate(1)" title="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <div class="lb-swipe-hint" id="lb-swipe-hint">Swipe to navigate</div>
+  </div>
+
+  <div class="lb-strip" id="lb-strip"></div>
 </div>
 
 <!-- Toast Container -->
@@ -598,6 +856,11 @@ let currentSortBy = 'name';
 let currentSortDir = 'asc';
 let itemToRename = null;
 
+// Lightbox state
+let lbFiles = [];       // previewable files
+let lbAllFiles = [];    // all files for thumbnails
+let lbIndex = 0;
+
 // ─── NETWORK SPEED ────────────────────────────────────────────────
 async function measureSpeed() {
   try {
@@ -613,7 +876,6 @@ async function measureSpeed() {
     document.getElementById('net-speed').textContent = '— Mbps';
   }
 }
-
 setInterval(measureSpeed, 8000);
 measureSpeed();
 
@@ -650,12 +912,10 @@ function sessionSet(token, user) {
   localStorage.setItem('dv_token', JSON.stringify(token));
   localStorage.setItem('dv_user', JSON.stringify(user));
 }
-
 function sessionGet() {
   const t = localStorage.getItem('dv_token');
   return t ? JSON.parse(t) : null;
 }
-
 function sessionClear() {
   localStorage.removeItem('dv_token');
   localStorage.removeItem('dv_user');
@@ -674,7 +934,7 @@ function signIn() {
 async function onTokenResponse(resp) {
   if (resp.error) {
     toast('Sign-in failed: ' + resp.error, 'error');
-    document.getElementById('signin-btn').textContent = 'Sign in with Google';
+    document.getElementById('signin-btn').innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg> Sign in with Google`;
     return;
   }
   const token = gapi.client.getToken();
@@ -719,14 +979,14 @@ function signOut() {
 }
 
 // ─── FILE LISTING ─────────────────────────────────────────────────
-function changeSortBy(val) {
-  currentSortBy = val;
-  loadFiles(currentFolderId);
-}
+function changeSortBy(val) { currentSortBy = val; loadFiles(currentFolderId); }
 
 function toggleSortDir() {
   currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
-  document.getElementById('sort-dir-btn').textContent = currentSortDir === 'asc' ? '↓' : '↑';
+  const icon = document.getElementById('sort-icon');
+  icon.innerHTML = currentSortDir === 'asc'
+    ? '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>'
+    : '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>';
   loadFiles(currentFolderId);
 }
 
@@ -734,21 +994,21 @@ async function loadFiles(folderId) {
   document.getElementById('file-list').innerHTML =
     '<div class="loading"><div class="spinner"></div><span>Loading…</span></div>';
 
-  const sortOrderStr = currentSortBy === 'name' ? 
-    `folder,name ${currentSortDir === 'asc' ? '' : 'desc'}` : 
-    `folder,${currentSortBy} ${currentSortDir === 'asc' ? '' : 'desc'}`;
+  const sortOrderStr = currentSortBy === 'name'
+    ? `folder,name ${currentSortDir === 'asc' ? '' : 'desc'}`
+    : `folder,${currentSortBy} ${currentSortDir === 'asc' ? '' : 'desc'}`;
 
   try {
     const res = await gapi.client.drive.files.list({
       q: `'${folderId}' in parents and trashed=false`,
-      fields: 'files(id,name,mimeType,size,modifiedTime,iconLink,hasThumbnail,thumbnailLink,webContentLink,capabilities)',
+      fields: 'files(id,name,mimeType,size,modifiedTime,iconLink,hasThumbnail,thumbnailLink,webContentLink,webViewLink,capabilities)',
       orderBy: sortOrderStr.trim(),
       pageSize: 100,
     });
     renderFiles(res.result.files || []);
   } catch (e) {
     document.getElementById('file-list').innerHTML =
-      '<div class="empty"><div class="empty-icon">⚠️</div><p>Failed to load files</p></div>';
+      '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Failed to load files</p></div>';
     toast('Error loading files', 'error');
   }
 }
@@ -757,46 +1017,214 @@ function renderFiles(files) {
   const container = document.getElementById('file-list');
   document.getElementById('file-count').textContent = `${files.length} item${files.length !== 1 ? 's' : ''}`;
 
+  // Build lightbox list (non-folder files)
+  lbAllFiles = files.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
+
   if (!files.length) {
-    container.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>This folder is empty</p></div>';
+    container.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <p>This folder is empty</p></div>`;
     return;
   }
 
-  container.innerHTML = files.map(f => {
+  container.innerHTML = files.map((f, idx) => {
     const isFolder = f.mimeType === 'application/vnd.google-apps.folder';
-    
-    let iconHTML = `<div class="file-icon">${isFolder ? '📁' : getIcon(f.mimeType, f.name)}</div>`;
+    const fileIdx = lbAllFiles.indexOf(f);
+    const isImage = f.mimeType && f.mimeType.startsWith('image/');
+    const isVideo = f.mimeType && f.mimeType.startsWith('video/');
+
+    // Preview area
+    let previewHTML = '';
     if (f.hasThumbnail && f.thumbnailLink) {
-      iconHTML = `<div class="file-icon"><img src="${f.thumbnailLink}" alt="thumbnail"/></div>`;
+      previewHTML = `<div class="file-preview">
+        <img src="${f.thumbnailLink}" alt="thumb" loading="lazy"/>
+        ${isVideo ? `<div class="preview-play-badge">${svgPlay()}</div>` : ''}
+      </div>`;
+    } else {
+      previewHTML = `<div class="file-preview">
+        <div class="file-preview-icon">${getIconSvg(f.mimeType, f.name)}</div>
+        ${isVideo ? `<div class="preview-play-badge">${svgPlay()}</div>` : ''}
+      </div>`;
     }
 
     const size = f.size ? fmtBytes(f.size) : '';
     const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString() : '';
-    
+
     const canRename = f.capabilities && f.capabilities.canRename;
     const canDelete = f.capabilities && f.capabilities.canDelete;
-    
+
     let actionsHTML = '<div class="file-actions" onclick="event.stopPropagation()">';
     if (!isFolder && f.webContentLink) {
-      actionsHTML += `<a href="${f.webContentLink}" target="_blank" class="action-btn" title="Download">⬇️</a>`;
+      actionsHTML += `<a href="${f.webContentLink}" target="_blank" class="action-btn" title="Download" onclick="event.stopPropagation()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </a>`;
     }
     if (canRename) {
-      actionsHTML += `<button class="action-btn" title="Rename" onclick="openRenameModal('${f.id}', '${esc(f.name)}')">✏️</button>`;
+      actionsHTML += `<button class="action-btn" title="Rename" onclick="event.stopPropagation();openRenameModal('${f.id}','${esc(f.name)}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>`;
     }
     if (canDelete) {
-      actionsHTML += `<button class="action-btn danger" title="Delete" onclick="deleteFile('${f.id}', '${esc(f.name)}')">🗑️</button>`;
+      actionsHTML += `<button class="action-btn danger" title="Delete" onclick="event.stopPropagation();deleteFile('${f.id}','${esc(f.name)}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </button>`;
     }
     actionsHTML += '</div>';
 
+    const clickHandler = isFolder
+      ? `navigateIn('${f.id}','${esc(f.name)}')`
+      : fileIdx >= 0
+        ? `openLightbox(${fileIdx})`
+        : '';
+
     return `
-      <div class="file-card ${isFolder ? 'folder' : ''}" onclick="${isFolder ? `navigateIn('${f.id}','${esc(f.name)}')` : ''}">
+      <div class="file-card ${isFolder ? 'folder' : ''}" onclick="${clickHandler}">
         ${actionsHTML}
-        ${iconHTML}
-        <div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div>
-        <div class="file-meta">${[size, date].filter(Boolean).join(' · ')}</div>
+        ${previewHTML}
+        <div class="file-info">
+          <div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div>
+          <div class="file-meta">${[size, date].filter(Boolean).join(' · ')}</div>
+        </div>
       </div>`;
   }).join('');
 }
+
+// ─── LIGHTBOX ─────────────────────────────────────────────────────
+function openLightbox(idx) {
+  lbIndex = idx;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  lbRender();
+  lbBuildStrip();
+  setupSwipe();
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+  // Stop video
+  const vid = document.getElementById('lb-video');
+  vid.pause();
+  vid.src = '';
+}
+
+function lbNavigate(dir) {
+  const newIdx = lbIndex + dir;
+  if (newIdx < 0 || newIdx >= lbAllFiles.length) return;
+  lbIndex = newIdx;
+  lbRender();
+  lbScrollStrip();
+}
+
+function lbRender() {
+  const f = lbAllFiles[lbIndex];
+  if (!f) return;
+
+  document.getElementById('lb-title').textContent = f.name;
+  document.getElementById('lb-meta').textContent = f.size ? fmtBytes(f.size) : '';
+  document.getElementById('lb-counter').textContent = `${lbIndex + 1} / ${lbAllFiles.length}`;
+
+  // Update nav arrows
+  document.getElementById('lb-prev').disabled = lbIndex === 0;
+  document.getElementById('lb-next').disabled = lbIndex === lbAllFiles.length - 1;
+
+  // Download link
+  const dlBtn = document.getElementById('lb-download');
+  if (f.webContentLink) {
+    dlBtn.href = f.webContentLink;
+    dlBtn.style.display = '';
+  } else {
+    dlBtn.style.display = 'none';
+  }
+
+  // Hide all media
+  const img = document.getElementById('lb-image');
+  const vid = document.getElementById('lb-video');
+  const gen = document.getElementById('lb-generic');
+  vid.pause(); vid.src = '';
+  img.style.display = 'none';
+  vid.style.display = 'none';
+  gen.style.display = 'none';
+
+  const isImage = f.mimeType && f.mimeType.startsWith('image/');
+  const isVideo = f.mimeType && f.mimeType.startsWith('video/');
+
+  if (isImage) {
+    // Use thumbnail or direct link
+    const src = f.thumbnailLink
+      ? f.thumbnailLink.replace('=s220', '=s1600')
+      : (f.webContentLink || '');
+    img.src = src;
+    img.style.display = 'block';
+    img.style.animation = 'none';
+    void img.offsetWidth;
+    img.style.animation = '';
+  } else if (isVideo && f.webContentLink) {
+    vid.src = f.webContentLink;
+    vid.style.display = 'block';
+    vid.style.animation = 'none';
+    void vid.offsetWidth;
+    vid.style.animation = '';
+  } else {
+    gen.style.display = 'flex';
+    document.getElementById('lb-generic-icon').innerHTML = getIconSvg(f.mimeType, f.name, 80);
+    document.getElementById('lb-generic-label').textContent = f.name;
+    const genDl = document.getElementById('lb-generic-download');
+    if (f.webContentLink) { genDl.href = f.webContentLink; genDl.style.display = ''; }
+    else { genDl.style.display = 'none'; }
+  }
+
+  // Update strip active
+  document.querySelectorAll('.lb-thumb').forEach((el, i) => {
+    el.classList.toggle('active', i === lbIndex);
+  });
+}
+
+function lbBuildStrip() {
+  const strip = document.getElementById('lb-strip');
+  strip.innerHTML = lbAllFiles.map((f, i) => {
+    const hasThumb = f.hasThumbnail && f.thumbnailLink;
+    return `<div class="lb-thumb ${i === lbIndex ? 'active' : ''}" onclick="lbIndex=${i};lbRender();lbScrollStrip()">
+      ${hasThumb
+        ? `<img src="${f.thumbnailLink}" loading="lazy" alt=""/>`
+        : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">${getIconSvg(f.mimeType, f.name, 20)}</div>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function lbScrollStrip() {
+  const strip = document.getElementById('lb-strip');
+  const thumbs = strip.querySelectorAll('.lb-thumb');
+  if (thumbs[lbIndex]) {
+    thumbs[lbIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+  document.querySelectorAll('.lb-thumb').forEach((el, i) => {
+    el.classList.toggle('active', i === lbIndex);
+  });
+}
+
+// Touch swipe
+function setupSwipe() {
+  const lb = document.getElementById('lightbox');
+  let startX = null;
+  lb.ontouchstart = e => { startX = e.touches[0].clientX; };
+  lb.ontouchend = e => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 50) lbNavigate(dx < 0 ? 1 : -1);
+    startX = null;
+  };
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'ArrowRight') lbNavigate(1);
+  if (e.key === 'ArrowLeft') lbNavigate(-1);
+  if (e.key === 'Escape') closeLightbox();
+});
 
 // ─── NAVIGATION ───────────────────────────────────────────────────
 function navigateIn(id, name) {
@@ -818,8 +1246,7 @@ function buildBreadcrumb() {
   const bc = document.getElementById('breadcrumb');
   bc.innerHTML = folderStack.map((f, i) => {
     const isLast = i === folderStack.length - 1;
-    return `
-      ${i > 0 ? '<span class="breadcrumb-sep">›</span>' : ''}
+    return `${i > 0 ? '<span class="breadcrumb-sep">›</span>' : ''}
       <span class="breadcrumb-item ${isLast ? 'active' : ''}" onclick="navigateTo(${i})">${esc(f.name)}</span>`;
   }).join('');
 }
@@ -876,7 +1303,7 @@ function renderUploadItem(id) {
   el.className = 'upload-item'; el.id = `ui-${id}`;
   el.innerHTML = `
     <div class="upload-item-top">
-      <div class="upload-item-icon">${getIcon('', item.file.name)}</div>
+      <div class="upload-item-icon">${getIconSvg('', item.file.name, 20)}</div>
       <div class="upload-item-info">
         <div class="upload-item-name">${esc(item.file.name)}</div>
         <div class="upload-item-size">${fmtBytes(item.file.size)}</div>
@@ -920,7 +1347,6 @@ async function uploadFile(id) {
       const eta = remaining < 60 ? `${Math.ceil(remaining)}s left` : `${Math.ceil(remaining/60)}m left`;
       document.getElementById(`uspd-${id}`).textContent = mbps + ' Mbps';
       document.getElementById(`ueta-${id}`).textContent = eta;
-      // update global network badge
       document.getElementById('net-speed').textContent = mbps + ' Mbps';
       lastLoaded = e.loaded; lastTime = now;
     }
@@ -957,21 +1383,44 @@ function setStatus(id, cls, text) {
   el.textContent = text;
 }
 
-// ─── UTILS ────────────────────────────────────────────────────────
-function getIcon(mime = '', name = '') {
-  const ext = name.split('.').pop().toLowerCase();
-  if (mime.includes('image') || ['jpg','jpeg','png','gif','webp','svg','ico'].includes(ext)) return '🖼️';
-  if (mime.includes('video') || ['mp4','mov','avi','mkv','webm'].includes(ext)) return '🎬';
-  if (mime.includes('audio') || ['mp3','wav','flac','aac','ogg'].includes(ext)) return '🎵';
-  if (mime.includes('pdf') || ext === 'pdf') return '📄';
-  if (['zip','rar','7z','tar','gz'].includes(ext)) return '📦';
-  if (['doc','docx'].includes(ext)) return '📝';
-  if (['xls','xlsx'].includes(ext)) return '📊';
-  if (['ppt','pptx'].includes(ext)) return '📽️';
-  if (['js','ts','py','php','html','css','json','xml','sh'].includes(ext)) return '💻';
-  return '📋';
+// ─── SVG ICONS ────────────────────────────────────────────────────
+function svgPlay() {
+  return `<svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.9)" width="38" height="38"><circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.45)"/><polygon points="10,8 18,12 10,16" fill="white"/></svg>`;
 }
 
+function getIconSvg(mime = '', name = '', size = 48) {
+  const ext = (name || '').split('.').pop().toLowerCase();
+  const s = `width="${size}" height="${size}"`;
+
+  const isImage = (mime && mime.startsWith('image/')) || ['jpg','jpeg','png','gif','webp','svg','ico','bmp','tiff'].includes(ext);
+  const isVideo = (mime && mime.startsWith('video/')) || ['mp4','mov','avi','mkv','webm','flv'].includes(ext);
+  const isAudio = (mime && mime.startsWith('audio/')) || ['mp3','wav','flac','aac','ogg','m4a'].includes(ext);
+  const isPdf = (mime && mime.includes('pdf')) || ext === 'pdf';
+  const isArchive = ['zip','rar','7z','tar','gz','bz2'].includes(ext);
+  const isDoc = ['doc','docx'].includes(ext) || (mime && mime.includes('document'));
+  const isSheet = ['xls','xlsx','csv'].includes(ext) || (mime && mime.includes('spreadsheet'));
+  const isSlide = ['ppt','pptx'].includes(ext) || (mime && mime.includes('presentation'));
+  const isCode = ['js','ts','py','php','html','css','json','xml','sh','rb','go','rs','cpp','c','java'].includes(ext);
+  const isFolder = mime === 'application/vnd.google-apps.folder';
+
+  const col = 'currentColor';
+  const sw = Math.max(1, size / 30);
+
+  if (isFolder) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
+  if (isImage) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#43d9ad" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+  if (isVideo) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#ff6584" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>`;
+  if (isAudio) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`;
+  if (isPdf) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
+  if (isArchive) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`;
+  if (isDoc) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`;
+  if (isSheet) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`;
+  if (isSlide) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+  if (isCode) return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`;
+  // Default file
+  return `<svg ${s} viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────
 function fmtBytes(b) {
   if (!b) return '';
   b = parseInt(b);
@@ -982,14 +1431,18 @@ function fmtBytes(b) {
 }
 
 function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function toast(msg, type = 'info') {
-  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  const icons = {
+    success: `<svg viewBox="0 0 24 24" fill="none" stroke="#43d9ad" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+    error: `<svg viewBox="0 0 24 24" fill="none" stroke="#ff6584" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    info: `<svg viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  };
   const el = document.createElement('div');
   el.className = 'toast ' + type;
-  el.innerHTML = `<span>${icons[type] || ''}</span><span>${esc(msg)}</span>`;
+  el.innerHTML = `${icons[type] || ''}<span>${esc(msg)}</span>`;
   document.getElementById('toast-container').appendChild(el);
   setTimeout(() => el.remove(), 4000);
 }
@@ -1011,47 +1464,35 @@ function closeRenameModal() {
 async function renameFile() {
   if (!itemToRename) return;
   const newName = document.getElementById('rename-input').value.trim();
-  if (!newName || newName === itemToRename.name) {
-    closeRenameModal();
-    return;
-  }
+  if (!newName || newName === itemToRename.name) { closeRenameModal(); return; }
   const id = itemToRename.id;
   closeRenameModal();
   try {
-    await gapi.client.drive.files.update({
-      fileId: id,
-      resource: { name: newName }
-    });
+    await gapi.client.drive.files.update({ fileId: id, resource: { name: newName } });
     toast(`Renamed to "${newName}"`, 'success');
     loadFiles(currentFolderId);
-  } catch (e) {
+  } catch {
     toast('Failed to rename', 'error');
   }
 }
 
 async function deleteFile(id, name) {
-  if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+  if (!confirm(`Delete "${name}"?`)) return;
   try {
     await gapi.client.drive.files.delete({ fileId: id });
     toast(`Deleted "${name}"`, 'success');
     loadFiles(currentFolderId);
-  } catch (e) {
+  } catch {
     toast('Failed to delete', 'error');
   }
 }
 
-// Close modal on overlay click
-document.getElementById('folder-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-document.getElementById('rename-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeRenameModal();
-});
+// Close modals on overlay click
+document.getElementById('folder-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.getElementById('rename-modal').addEventListener('click', function(e) { if (e.target === this) closeRenameModal(); });
 </script>
 
-<!-- Load Google APIs -->
 <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
 <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
-
 </body>
 </html>
