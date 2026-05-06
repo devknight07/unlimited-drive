@@ -990,13 +990,61 @@ function toggleSortDir() {
   loadFiles(currentFolderId);
 }
 
+// Map file to a sortable type category label
+function getTypeCategory(f) {
+  const mime = f.mimeType || '';
+  const ext = (f.name || '').split('.').pop().toLowerCase();
+  // Note: folders are handled separately in clientSort, not here
+  if (mime.startsWith('image/') || ['jpg','jpeg','png','gif','webp','svg','ico','bmp','tiff'].includes(ext)) return 'a_image';
+  if (mime.startsWith('video/') || ['mp4','mov','avi','mkv','webm','flv'].includes(ext)) return 'b_video';
+  if (mime.startsWith('audio/') || ['mp3','wav','flac','aac','ogg','m4a'].includes(ext)) return 'c_audio';
+  if (mime.includes('pdf') || ext === 'pdf') return 'd_pdf';
+  if (mime.includes('spreadsheet') || ['xls','xlsx','csv'].includes(ext)) return 'e_sheet';
+  if (mime.includes('presentation') || ['ppt','pptx'].includes(ext)) return 'f_slide';
+  if (mime.includes('document') || ['doc','docx'].includes(ext)) return 'g_doc';
+  if (['zip','rar','7z','tar','gz','bz2'].includes(ext)) return 'h_archive';
+  if (['js','ts','py','php','html','css','json','xml','sh','rb','go','rs','cpp','c','java'].includes(ext)) return 'i_code';
+  return 'z_other';
+}
+
+function clientSort(files) {
+  const dir = currentSortDir === 'asc' ? 1 : -1;
+  return [...files].sort((a, b) => {
+    const aFolder = a.mimeType === 'application/vnd.google-apps.folder';
+    const bFolder = b.mimeType === 'application/vnd.google-apps.folder';
+    // Folders always stay on top regardless of sort direction
+    if (aFolder !== bFolder) return aFolder ? -1 : 1;
+
+    if (currentSortBy === 'mimeType') {
+      const ta = getTypeCategory(a), tb = getTypeCategory(b);
+      if (ta !== tb) return (ta < tb ? -1 : 1) * dir;
+      // Tie-break within same type: name ascending
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    }
+    if (currentSortBy === 'quotaBytesUsed') {
+      const sa = parseInt(a.size || 0), sb = parseInt(b.size || 0);
+      if (sa !== sb) return (sa - sb) * dir;
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    }
+    if (currentSortBy === 'modifiedTime') {
+      const da = new Date(a.modifiedTime || 0), db = new Date(b.modifiedTime || 0);
+      if (da - db !== 0) return (da - db) * dir;
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    }
+    // name
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) * dir;
+  });
+}
+
 async function loadFiles(folderId) {
   document.getElementById('file-list').innerHTML =
     '<div class="loading"><div class="spinner"></div><span>Loading…</span></div>';
 
-  const sortOrderStr = currentSortBy === 'name'
-    ? `folder,name ${currentSortDir === 'asc' ? '' : 'desc'}`
-    : `folder,${currentSortBy} ${currentSortDir === 'asc' ? '' : 'desc'}`;
+  // Drive API only reliably sorts by name and modifiedTime; everything else client-side
+  const apiSortable = currentSortBy === 'name' || currentSortBy === 'modifiedTime';
+  const apiOrderBy = apiSortable
+    ? ('folder,' + currentSortBy + (currentSortDir === 'desc' ? ' desc' : '')).trim()
+    : 'folder,name';
 
   try {
     let allFiles = [];
@@ -1006,7 +1054,7 @@ async function loadFiles(folderId) {
       const params = {
         q: `'${folderId}' in parents and trashed=false`,
         fields: 'nextPageToken,files(id,name,mimeType,size,modifiedTime,hasThumbnail,thumbnailLink,webContentLink,webViewLink,capabilities)',
-        orderBy: sortOrderStr.trim(),
+        orderBy: apiOrderBy,
         pageSize: 1000,
       };
       if (pageToken) params.pageToken = pageToken;
@@ -1016,14 +1064,14 @@ async function loadFiles(folderId) {
       allFiles = allFiles.concat(batch);
       pageToken = res.result.nextPageToken || null;
 
-      // Show incremental progress while more pages remain
       if (pageToken) {
         document.getElementById('file-list').innerHTML =
           `<div class="loading"><div class="spinner"></div><span>Loading… ${allFiles.length} items</span></div>`;
       }
     } while (pageToken);
 
-    renderFiles(allFiles);
+    // Always client-sort for type/size; also re-sort name/date for correctness across pages
+    renderFiles(clientSort(allFiles));
   } catch (e) {
     document.getElementById('file-list').innerHTML =
       '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Failed to load files</p></div>';
